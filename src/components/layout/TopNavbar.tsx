@@ -2,13 +2,27 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface TopNavbarProps {
-  onToggleMobileMenu?: () => void;
+  isCollapsed?: boolean;
+  onToggleMenu?: () => void;
+  onToggleMobileMenu?: () => void; // backwards compat if passed
 }
 
-export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleMobileMenu }) => {
+export const TopNavbar: React.FC<TopNavbarProps> = ({
+  isCollapsed = false,
+  onToggleMenu,
+  onToggleMobileMenu,
+}) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const handleToggle = () => {
+    if (onToggleMenu) {
+      onToggleMenu();
+    } else if (onToggleMobileMenu) {
+      onToggleMobileMenu();
+    }
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,29 +32,51 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleMobileMenu }) => {
   };
 
   return (
-    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 z-40 bg-surface/95 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center px-4 md:px-margin transition-all">
-      {/* Left: Mobile Menu Toggle & Live Status */}
+    <header
+      className={`fixed top-0 right-0 h-16 z-40 bg-surface/95 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center px-3 md:px-margin transition-all duration-300 ease-in-out ${
+        isCollapsed
+          ? 'w-full md:w-[calc(100%-4.5rem)]'
+          : 'w-full md:w-[calc(100%-16rem)]'
+      }`}
+    >
+      {/* Left: 3-Line Hamburger Menu Toggle + Live Status */}
       <div className="flex items-center gap-3">
+        {/* 3-Line Hamburger Button (Visible on all screen sizes) */}
         <button
-          onClick={onToggleMobileMenu}
-          className="md:hidden p-2 text-on-surface hover:bg-surface-container rounded-lg"
-          aria-label="Open Navigation"
+          onClick={handleToggle}
+          className="group flex items-center justify-center w-10 h-10 rounded-xl text-on-surface hover:text-primary hover:bg-surface-container active:scale-95 transition-all"
+          title={isCollapsed ? "Expand Sidebar Menu ( [ )" : "Collapse Sidebar Menu ( [ )"}
+          aria-label="Toggle Sidebar Menu"
         >
-          <span className="material-symbols-outlined">menu</span>
+          <div className="flex flex-col justify-center items-center gap-1 w-5 h-5">
+            <span
+              className={`h-0.5 bg-current rounded-full transition-all duration-200 ${
+                isCollapsed ? 'w-5' : 'w-4 group-hover:w-5'
+              }`}
+            />
+            <span className="h-0.5 w-5 bg-current rounded-full transition-all duration-200" />
+            <span
+              className={`h-0.5 bg-current rounded-full transition-all duration-200 ${
+                isCollapsed ? 'w-5' : 'w-3 group-hover:w-5'
+              }`}
+            />
+          </div>
         </button>
 
+        {/* Live Monitoring Badge */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] rounded-full font-label-md text-[11px] font-bold tracking-wider">
           <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
-          LIVE MONITORING
+          <span>LIVE MONITORING</span>
         </div>
 
+        {/* Time Status */}
         <span className="text-on-surface-variant font-label-md text-[11px] hidden lg:block">
           Last updated: 12 seconds ago
         </span>
       </div>
 
       {/* Right: Search + Quick Actions + User Profile */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">
             search
@@ -58,10 +94,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleMobileMenu }) => {
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-full transition-colors relative"
+            className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-full transition-colors relative"
             title="Notifications"
+            aria-label="Notifications"
           >
             <span className="material-symbols-outlined text-[20px]">notifications</span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface animate-ping"></span>
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
           </button>
 
@@ -111,8 +149,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onToggleMobileMenu }) => {
         {/* Settings button */}
         <button
           onClick={() => navigate('/settings')}
-          className="p-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-full transition-colors hidden sm:block"
+          className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-full transition-colors hidden sm:block"
           title="Settings"
+          aria-label="Settings"
         >
           <span className="material-symbols-outlined text-[20px]">settings</span>
         </button>
