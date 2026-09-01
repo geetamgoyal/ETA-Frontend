@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { MOCK_TRAINS } from '../../data/trains';
 import { SimulationResult } from '../../types/simulation';
 
@@ -8,6 +9,7 @@ interface SimulationModalProps {
 }
 
 export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClose }) => {
+  const { t, language } = useLanguage();
   const [selectedTrainId, setSelectedTrainId] = useState(MOCK_TRAINS[0].id);
   const [scenarioType, setScenarioType] = useState<'signal_failure' | 'track_maintenance' | 'weather_disruption' | 'speed_boost' | 'priority_overtake'>('track_maintenance');
   const [impactZone, setImpactZone] = useState('Kanpur – Prayagraj');
@@ -26,19 +28,29 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
 
       if (scenarioType === 'track_maintenance') {
         delta = intensityMinutes + 6;
-        summary = `Imposing 30 km/h TSR (Temporary Speed Restriction) across ${impactZone} adds +${delta}m delay.`;
+        summary = language === 'hi'
+          ? `${impactZone} में 30 किमी/घंटा टीएसआर लगाने से +${delta} मिनट की देरी होती है।`
+          : `Imposing 30 km/h TSR (Temporary Speed Restriction) across ${impactZone} adds +${delta}m delay.`;
       } else if (scenarioType === 'signal_failure') {
         delta = intensityMinutes + 14;
-        summary = `Signal aspect failure at ${impactZone} causes block-level cascading delay of +${delta}m.`;
+        summary = language === 'hi'
+          ? `${impactZone} पर सिग्नल खराबी के कारण ब्लॉक-स्तरीय +${delta} मिनट की कैस्केडिंग देरी होती है।`
+          : `Signal aspect failure at ${impactZone} causes block-level cascading delay of +${delta}m.`;
       } else if (scenarioType === 'weather_disruption') {
         delta = intensityMinutes + 10;
-        summary = `Dense fog / heavy rain restricts maximum allowable speed to 60 km/h with +${delta}m impact.`;
+        summary = language === 'hi'
+          ? `घने कोहरे/भारी बारिश के कारण गति सीमा 60 किमी/घंटा और +${delta} मिनट का प्रभाव पड़ता है।`
+          : `Dense fog / heavy rain restricts maximum allowable speed to 60 km/h with +${delta}m impact.`;
       } else if (scenarioType === 'speed_boost') {
         delta = -Math.min(intensityMinutes, 12);
-        summary = `Clearing bidirectional green corridor allows train to recover ${Math.abs(delta)}m before terminal.`;
+        summary = language === 'hi'
+          ? `ग्रीन कॉरिडोर क्लीयर करने से ट्रेन टर्मिनल से पहले ${Math.abs(delta)} मिनट की भरपाई करती है।`
+          : `Clearing bidirectional green corridor allows train to recover ${Math.abs(delta)}m before terminal.`;
       } else {
         delta = -8;
-        summary = `Overtaking freight consist at Kanpur loop saves 8 minutes of dwell penalty.`;
+        summary = language === 'hi'
+          ? `कानपुर लूप पर मालगाड़ी को ओवरटेक करने से 8 मिनट की बचत होती है।`
+          : `Overtaking freight consist at Kanpur loop saves 8 minutes of dwell penalty.`;
       }
 
       // Calculate new time
@@ -72,16 +84,17 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
             </span>
             <div>
               <h3 className="font-headline-sm text-headline-sm font-bold">
-                AI What-If Operational Simulation
+                {t('sim.title')}
               </h3>
               <p className="text-sm text-on-primary-container">
-                Simulate network disruptions, TSRs, and signal clearance to predict cascading ETA impacts.
+                {t('sim.subtitle')}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label={t('sim.close')}
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -92,7 +105,7 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
           {/* Select Train */}
           <div>
             <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-2">
-              Target Coaching Train
+              {t('sim.target_train')}
             </label>
             <select
               value={selectedTrainId}
@@ -111,24 +124,34 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-2">
-                Disruption Scenario
+                {t('sim.disruption_scenario')}
               </label>
               <select
                 value={scenarioType}
                 onChange={(e) => setScenarioType(e.target.value as any)}
                 className="w-full p-2.5 bg-surface-container-low border border-outline-variant/50 rounded-lg font-body-md text-on-surface focus:outline-none focus:border-secondary"
               >
-                <option value="track_maintenance">Track Maintenance (Speed Restriction)</option>
-                <option value="signal_failure">Signal Interlocking Failure</option>
-                <option value="weather_disruption">Adverse Weather / Fog Protocol</option>
-                <option value="speed_boost">Green Corridor Dispatch (Clear Ahead)</option>
-                <option value="priority_overtake">Freight Loop Overtake</option>
+                <option value="track_maintenance">
+                  {language === 'hi' ? 'ट्रैक रखरखाव (गति प्रतिबंध)' : 'Track Maintenance (Speed Restriction)'}
+                </option>
+                <option value="signal_failure">
+                  {language === 'hi' ? 'सिग्नल इंटरलॉकिंग खराबी' : 'Signal Interlocking Failure'}
+                </option>
+                <option value="weather_disruption">
+                  {language === 'hi' ? 'प्रतिकूल मौसम / कोहरा प्रोटोकॉल' : 'Adverse Weather / Fog Protocol'}
+                </option>
+                <option value="speed_boost">
+                  {language === 'hi' ? 'ग्रीन कॉरिडोर प्रेषण (क्लीयर अहेड)' : 'Green Corridor Dispatch (Clear Ahead)'}
+                </option>
+                <option value="priority_overtake">
+                  {language === 'hi' ? 'मालगाड़ी लूप ओवरटेक' : 'Freight Loop Overtake'}
+                </option>
               </select>
             </div>
 
             <div>
               <label className="block font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-2">
-                Corridor / Block Section
+                {t('sim.corridor_section')}
               </label>
               <select
                 value={impactZone}
@@ -147,7 +170,7 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-                Disruption Magnitude: <span className="text-primary font-bold">{intensityMinutes} minutes</span>
+                {t('sim.magnitude')}: <span className="text-primary font-bold">{intensityMinutes} {language === 'hi' ? 'मिनट' : 'minutes'}</span>
               </label>
             </div>
             <input
@@ -172,14 +195,14 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
                 <span className="material-symbols-outlined animate-spin text-[20px]">
                   progress_activity
                 </span>
-                Computing Neural ETA Vector...
+                {t('sim.running')}
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-[20px]">
                   auto_awesome
                 </span>
-                Run AI ETA Forecast Simulation
+                {t('sim.run_btn')}
               </>
             )}
           </button>
@@ -190,14 +213,14 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
               <div className="flex justify-between items-start">
                 <div>
                   <span className="font-label-md text-[11px] uppercase tracking-wider text-secondary font-bold">
-                    Simulation Forecast Result
+                    {t('sim.result_title')}
                   </span>
                   <h4 className="font-headline-sm text-headline-sm text-primary font-bold">
                     {result.trainName}
                   </h4>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-on-surface-variant block">Prediction Confidence</span>
+                  <span className="text-xs text-on-surface-variant block">{t('sim.confidence')}</span>
                   <span className="font-mono-data text-secondary font-bold text-base">
                     {result.confidenceScore}%
                   </span>
@@ -206,19 +229,19 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
 
               <div className="grid grid-cols-3 gap-3 p-3 bg-white rounded-lg border border-outline-variant/20 text-center">
                 <div>
-                  <span className="text-xs text-on-surface-variant block">Baseline ETA</span>
+                  <span className="text-xs text-on-surface-variant block">{t('sim.baseline_eta')}</span>
                   <span className="font-mono-data text-base font-bold text-on-surface">
                     {result.originalEta}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-on-surface-variant block">Simulated ETA</span>
+                  <span className="text-xs text-on-surface-variant block">{t('sim.simulated_eta')}</span>
                   <span className={`font-mono-data text-lg font-black ${result.delayDeltaMinutes > 0 ? 'text-error' : 'text-accent-green'}`}>
                     {result.simulatedEta}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-on-surface-variant block">Delta Impact</span>
+                  <span className="text-xs text-on-surface-variant block">{t('sim.delta_impact')}</span>
                   <span className={`font-mono-data text-base font-bold ${result.delayDeltaMinutes > 0 ? 'text-error' : 'text-accent-green'}`}>
                     {result.delayDeltaMinutes > 0 ? `+${result.delayDeltaMinutes}m` : `${result.delayDeltaMinutes}m`}
                   </span>
@@ -226,7 +249,7 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
               </div>
 
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                <span className="font-semibold text-primary">Operational Analysis:</span> {result.impactSummary}
+                <span className="font-semibold text-primary">{language === 'hi' ? 'परिचालन विश्लेषण:' : 'Operational Analysis:'}</span> {result.impactSummary}
               </p>
             </div>
           )}
@@ -238,7 +261,7 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
             onClick={onClose}
             className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors"
           >
-            Close
+            {t('sim.close')}
           </button>
         </div>
       </div>

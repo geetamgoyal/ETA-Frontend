@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { LanguageProvider } from './context/LanguageContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { TrainMonitoringPage } from './pages/TrainMonitoringPage';
@@ -18,7 +19,7 @@ export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <>
+    <LanguageProvider>
       {isLoading && (
         <LoadingScreen onComplete={() => setIsLoading(false)} />
       )}
@@ -43,7 +44,6 @@ export const App: React.FC = () => {
           </Route>
         </Routes>
       </BrowserRouter>
-    </>
+    </LanguageProvider>
   );
 };
-

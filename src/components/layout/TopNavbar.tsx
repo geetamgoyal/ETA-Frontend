@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface TopNavbarProps {
   isCollapsed?: boolean;
@@ -13,6 +14,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onToggleMobileMenu,
 }) => {
   const navigate = useNavigate();
+  const { language, toggleLanguage, t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -45,7 +47,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         <button
           onClick={handleToggle}
           className="group flex items-center justify-center w-10 h-10 rounded-xl text-on-surface hover:text-primary hover:bg-surface-container active:scale-95 transition-all"
-          title={isCollapsed ? "Expand Sidebar Menu ( [ )" : "Collapse Sidebar Menu ( [ )"}
+          title={isCollapsed ? t('nav.expand_sidebar') : t('nav.collapse_sidebar')}
           aria-label="Toggle Sidebar Menu"
         >
           <div className="flex flex-col justify-center items-center gap-1 w-5 h-5">
@@ -66,17 +68,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {/* Live Monitoring Badge */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] rounded-full font-label-md text-[11px] font-bold tracking-wider">
           <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
-          <span>LIVE MONITORING</span>
+          <span>{t('topbar.live_monitoring')}</span>
         </div>
 
         {/* Time Status */}
         <span className="text-on-surface-variant font-label-md text-[11px] hidden lg:block">
-          Last updated: 12 seconds ago
+          {t('topbar.last_updated')}
         </span>
       </div>
 
-      {/* Right: Search + Quick Actions + User Profile */}
-      <div className="flex items-center gap-2 md:gap-4">
+      {/* Right: Language Button + Search + Quick Actions + User Profile */}
+      <div className="flex items-center gap-2 md:gap-3.5">
+        {/* Search Input */}
         <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">
             search
@@ -85,17 +88,46 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search train (e.g., 12309, Rajdhani)..."
-            className="pl-9 pr-4 py-1.5 bg-surface-container-low border-b border-outline-variant focus:border-b-2 focus:border-secondary rounded-t-md outline-none font-body-md text-sm w-48 lg:w-64 transition-all text-on-surface"
+            placeholder={t('topbar.search_placeholder')}
+            className="pl-9 pr-4 py-1.5 bg-surface-container-low border-b border-outline-variant focus:border-b-2 focus:border-secondary rounded-t-md outline-none font-body-md text-sm w-44 lg:w-60 transition-all text-on-surface"
           />
         </form>
+
+        {/* 🌐 Hindi / English Language Switcher Button */}
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-secondary/30 bg-surface-container-low hover:bg-surface-container hover:border-secondary text-on-surface hover:text-primary transition-all shadow-xs text-xs font-semibold active:scale-95 group"
+          title={language === 'en' ? 'Switch to Hindi (हिन्दी में बदलें)' : 'Switch to English (अंग्रेज़ी में बदलें)'}
+          aria-label="Change Language to Hindi or English"
+        >
+          <span className="material-symbols-outlined text-[18px] text-secondary group-hover:scale-110 transition-transform">
+            translate
+          </span>
+          <div className="flex items-center gap-1 font-bold">
+            <span
+              className={`transition-colors ${
+                language === 'en' ? 'text-primary font-black underline underline-offset-2' : 'text-on-surface-variant font-medium'
+              }`}
+            >
+              EN
+            </span>
+            <span className="text-outline-variant/60 text-[10px] font-normal">/</span>
+            <span
+              className={`transition-colors ${
+                language === 'hi' ? 'text-primary font-black underline underline-offset-2' : 'text-on-surface-variant font-medium'
+              }`}
+            >
+              हिन्दी
+            </span>
+          </div>
+        </button>
 
         {/* Notifications Button & Dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-full transition-colors relative"
-            title="Notifications"
+            title={t('topbar.alerts_title')}
             aria-label="Notifications"
           >
             <span className="material-symbols-outlined text-[20px]">notifications</span>
@@ -106,9 +138,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl p-3 z-50 animate-fade-in">
               <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20 mb-2">
-                <span className="font-label-md text-xs font-bold text-primary">Alert Notifications</span>
+                <span className="font-label-md text-xs font-bold text-primary">{t('topbar.alerts_title')}</span>
                 <span className="text-[10px] text-error font-semibold bg-error-container/50 px-1.5 py-0.5 rounded">
-                  3 Critical
+                  {t('topbar.critical_count')}
                 </span>
               </div>
               <div className="space-y-2 text-xs">
@@ -119,8 +151,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }}
                   className="p-2 rounded-lg bg-error-container/20 hover:bg-error-container/40 cursor-pointer transition-colors"
                 >
-                  <p className="font-bold text-error">Unusual stoppage: Tr. 12050</p>
-                  <p className="text-on-surface-variant mt-0.5">Near Mathura/Jhansi (0 km/h)</p>
+                  <p className="font-bold text-error">
+                    {language === 'hi' ? 'असामान्य ठहराव: ट्रेन 12050' : 'Unusual stoppage: Tr. 12050'}
+                  </p>
+                  <p className="text-on-surface-variant mt-0.5">
+                    {language === 'hi' ? 'मथुरा/झांसी के निकट (0 किमी/घंटा)' : 'Near Mathura/Jhansi (0 km/h)'}
+                  </p>
                 </div>
                 <div
                   onClick={() => {
@@ -129,8 +165,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }}
                   className="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors"
                 >
-                  <p className="font-semibold text-on-surface">Delay Recovery: Tr. 12309</p>
-                  <p className="text-on-surface-variant mt-0.5">Recovered 4 min near Kanpur</p>
+                  <p className="font-semibold text-on-surface">
+                    {language === 'hi' ? 'देरी रिकवरी: ट्रेन 12309' : 'Delay Recovery: Tr. 12309'}
+                  </p>
+                  <p className="text-on-surface-variant mt-0.5">
+                    {language === 'hi' ? 'कानपुर के पास 4 मिनट की भरपाई' : 'Recovered 4 min near Kanpur'}
+                  </p>
                 </div>
               </div>
               <button
@@ -140,7 +180,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 }}
                 className="w-full text-center text-[11px] font-semibold text-secondary hover:underline pt-2 mt-2 border-t border-outline-variant/20 block"
               >
-                View All Alerts & Operational Risks →
+                {t('topbar.view_all_alerts')}
               </button>
             </div>
           )}
@@ -150,7 +190,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         <button
           onClick={() => navigate('/settings')}
           className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-full transition-colors hidden sm:block"
-          title="Settings"
+          title={t('nav.settings')}
           aria-label="Settings"
         >
           <span className="material-symbols-outlined text-[20px]">settings</span>
@@ -160,14 +200,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         <button
           onClick={() => navigate('/profile')}
           className="flex items-center gap-2 pl-2 border-l border-outline-variant/30 cursor-pointer group"
-          title="Operations Officer Profile"
+          title={t('topbar.chief_controller')}
         >
           <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xs ring-2 ring-transparent group-hover:ring-secondary transition-all">
             RO
           </div>
           <div className="text-left hidden xl:block">
-            <p className="text-xs font-semibold text-on-surface leading-tight">Chief Controller</p>
-            <p className="text-[10px] text-on-surface-variant">NCR Operations HQ</p>
+            <p className="text-xs font-semibold text-on-surface leading-tight">{t('topbar.chief_controller')}</p>
+            <p className="text-[10px] text-on-surface-variant">{t('topbar.ncr_hq')}</p>
           </div>
         </button>
       </div>

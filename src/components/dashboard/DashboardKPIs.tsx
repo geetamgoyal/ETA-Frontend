@@ -1,19 +1,22 @@
 import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const DashboardKPIs: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md">
       {/* 1. Trains Monitored */}
       <div className="bg-surface-container-lowest rounded-lg p-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div className="flex justify-between items-start">
           <span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Trains Monitored
+            {t('dash.trains_monitored')}
           </span>
           <span className="material-symbols-outlined text-primary">train</span>
         </div>
         <div className="flex flex-col mt-2">
           <span className="font-headline-lg text-headline-lg font-bold text-primary">128</span>
-          <span className="font-label-md text-label-md text-on-surface-variant">+8 today</span>
+          <span className="font-label-md text-label-md text-on-surface-variant">{t('dash.today_plus8')}</span>
         </div>
       </div>
 
@@ -21,7 +24,7 @@ export const DashboardKPIs: React.FC = () => {
       <div className="bg-surface-container-lowest rounded-lg p-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div className="flex justify-between items-start">
           <span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            On-Time Trains
+            {t('dash.on_time_trains')}
           </span>
           <span className="material-symbols-outlined text-secondary">check_circle</span>
         </div>
@@ -37,13 +40,13 @@ export const DashboardKPIs: React.FC = () => {
       <div className="bg-surface-container-lowest rounded-lg p-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div className="flex justify-between items-start">
           <span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Delayed Trains
+            {t('dash.delayed_trains')}
           </span>
           <span className="material-symbols-outlined text-on-surface-variant">schedule</span>
         </div>
         <div className="flex flex-col mt-2">
           <span className="font-headline-lg text-headline-lg font-bold text-primary">34</span>
-          <span className="font-label-md text-label-md text-on-surface-variant">↓ 3 from yesterday</span>
+          <span className="font-label-md text-label-md text-on-surface-variant">{t('dash.from_yesterday')}</span>
         </div>
       </div>
 
@@ -51,13 +54,13 @@ export const DashboardKPIs: React.FC = () => {
       <div className="bg-surface-container-lowest rounded-lg p-lg shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div className="flex justify-between items-start">
           <span className="font-label-md text-label-md text-error uppercase tracking-wider font-semibold">
-            Critical ETA Risks
+            {t('dash.critical_eta_risks')}
           </span>
           <span className="material-symbols-outlined text-error">warning</span>
         </div>
         <div className="flex flex-col mt-2">
           <span className="font-headline-lg text-headline-lg font-bold text-error">12</span>
-          <span className="font-label-md text-label-md text-error font-medium">3 require attention</span>
+          <span className="font-label-md text-label-md text-error font-medium">{t('dash.require_attention')}</span>
         </div>
       </div>
 
@@ -68,7 +71,7 @@ export const DashboardKPIs: React.FC = () => {
             <span className="material-symbols-outlined text-[16px] text-secondary">
               temp_preferences_custom
             </span>
-            AI Accuracy
+            {t('dash.ai_accuracy')}
           </span>
         </div>
         <div className="flex flex-col mt-2">

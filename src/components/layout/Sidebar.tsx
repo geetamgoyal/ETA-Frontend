@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface SidebarProps {
   onOpenSimulation: () => void;
@@ -11,15 +12,15 @@ interface SidebarProps {
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: string;
   icon: string;
-  description: string;
-  badge?: string;
+  descKey: string;
+  badgeKey?: string;
   badgeColor?: string;
 }
 
 interface NavSection {
-  title: string;
+  titleKey: string;
   items: NavItem[];
 }
 
@@ -40,91 +41,92 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
+  const { t } = useLanguage();
   const [activeTooltip, setActiveTooltip] = useState<TooltipState | null>(null);
 
   const navSections: NavSection[] = [
     {
-      title: 'Operations',
+      titleKey: 'nav.operations',
       items: [
         {
           to: '/',
-          label: 'Dashboard',
+          labelKey: 'nav.dashboard',
           icon: 'dashboard',
-          description: 'Live operations overview, network health & real-time KPIs',
+          descKey: 'desc.dashboard',
         },
         {
           to: '/train-monitoring',
-          label: 'Train Monitoring',
+          labelKey: 'nav.train_monitoring',
           icon: 'train',
-          description: 'Track coaching trains, live speeds, delays & current halts',
-          badge: '12 Live',
+          descKey: 'desc.train_monitoring',
+          badgeKey: 'badge.12_live',
           badgeColor: 'bg-primary/10 text-primary',
         },
         {
           to: '/live-network',
-          label: 'Live Network',
+          labelKey: 'nav.live_network',
           icon: 'hub',
-          description: 'Interactive railway network map, active junctions & tracks',
-          badge: 'LIVE',
+          descKey: 'desc.live_network',
+          badgeKey: 'badge.live',
           badgeColor: 'bg-emerald-500/15 text-emerald-600',
         },
         {
           to: '/eta-forecast',
-          label: 'AI ETA Forecast',
+          labelKey: 'nav.eta_forecast',
           icon: 'precision_manufacturing',
-          description: 'AI-predicted arrival times, delay risk & recovery curves',
-          badge: 'AI',
+          descKey: 'desc.eta_forecast',
+          badgeKey: 'badge.ai',
           badgeColor: 'bg-indigo-500/15 text-indigo-600',
         },
         {
           to: '/route-predictions',
-          label: 'Route Predictions',
+          labelKey: 'nav.route_predictions',
           icon: 'route',
-          description: 'Congestion heatmaps, switch routing & alternate paths',
+          descKey: 'desc.route_predictions',
         },
       ],
     },
     {
-      title: 'Intelligence & Alerts',
+      titleKey: 'nav.intelligence',
       items: [
         {
           to: '/alerts',
-          label: 'Alerts',
+          labelKey: 'nav.alerts',
           icon: 'notifications_active',
-          description: 'Active emergency alarms, unusual stoppages & speed warnings',
-          badge: '3 Critical',
+          descKey: 'desc.alerts',
+          badgeKey: 'badge.3_critical',
           badgeColor: 'bg-red-500 text-white',
         },
         {
           to: '/analytics',
-          label: 'Analytics',
+          labelKey: 'nav.analytics',
           icon: 'analytics',
-          description: 'Historical punctuality trends, speed stats & dwell times',
+          descKey: 'desc.analytics',
         },
       ],
     },
     {
-      title: 'System & Admin',
+      titleKey: 'nav.system_admin',
       items: [
         {
           to: '/system-status',
-          label: 'System Status',
+          labelKey: 'nav.system_status',
           icon: 'dns',
-          description: 'Telemetry feeds health, AI model latencies & sensor status',
-          badge: '99.9%',
+          descKey: 'desc.system_status',
+          badgeKey: 'badge.99_9',
           badgeColor: 'bg-emerald-500/10 text-emerald-600',
         },
         {
           to: '/settings',
-          label: 'Settings',
+          labelKey: 'nav.settings',
           icon: 'settings',
-          description: 'Configure alert thresholds, map layers & system parameters',
+          descKey: 'desc.settings',
         },
         {
           to: '/profile',
-          label: 'Profile',
+          labelKey: 'nav.profile',
           icon: 'person',
-          description: 'Chief Controller credentials & assigned sector HQ',
+          descKey: 'desc.profile',
         },
       ],
     },
@@ -194,11 +196,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               handleMouseEnter(
                 e,
                 {
-                  label: 'RailForecast AI',
+                  label: t('nav.brand_title'),
                   icon: 'train',
-                  description: 'AI-Powered Railway Operations & Intelligent ETA Forecasting Platform',
+                  description: t('desc.platform'),
                 },
-                'Platform'
+                t('nav.platform')
               )
             }
             onMouseLeave={handleMouseLeave}
@@ -212,10 +214,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <div className="flex flex-col min-w-0 transition-opacity duration-200">
                 <h1 className="font-headline-sm text-[15px] font-extrabold text-primary leading-tight truncate tracking-tight">
-                  RailForecast <span className="text-secondary font-black">AI</span>
+                  {t('nav.brand_title')}
                 </h1>
                 <p className="font-label-md text-[10px] text-on-surface-variant font-medium tracking-wide uppercase truncate">
-                  Ops Intelligence
+                  {t('nav.ops_intelligence')}
                 </p>
               </div>
             )}
@@ -226,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={onToggleCollapse}
               className="hidden md:flex p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors"
-              title="Collapse sidebar ([)"
+              title={t('nav.collapse_sidebar')}
               aria-label="Collapse sidebar"
             >
               <span className="material-symbols-outlined text-[20px]">menu_open</span>
@@ -255,18 +257,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 handleMouseEnter(
                   e,
                   {
-                    label: 'New Simulation',
+                    label: t('nav.new_simulation'),
                     icon: 'science',
-                    description: 'Run what-if scenario simulations to evaluate train delay mitigations & routing',
-                    badge: 'Interactive',
+                    description: t('desc.new_simulation'),
+                    badge: t('badge.interactive'),
                     badgeColor: 'bg-secondary-container text-on-secondary-container',
                   },
-                  'Simulation Tool'
+                  t('nav.simulation_tool')
                 )
               }
               onMouseLeave={handleMouseLeave}
               className="w-11 h-11 rounded-xl bg-gradient-to-r from-secondary to-primary text-white flex items-center justify-center shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all"
-              aria-label="New Simulation"
+              aria-label={t('nav.new_simulation')}
             >
               <span className="material-symbols-outlined text-[20px]">science</span>
             </button>
@@ -279,7 +281,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-white font-label-md text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 active:scale-98"
             >
               <span className="material-symbols-outlined text-[18px]">science</span>
-              <span>New Simulation</span>
+              <span>{t('nav.new_simulation')}</span>
             </button>
           )}
         </div>
@@ -287,12 +289,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Navigation Sections */}
         <nav className="flex-1 px-2 py-2 flex flex-col gap-4">
           {navSections.map((section, idx) => (
-            <div key={section.title} className="flex flex-col gap-0.5">
+            <div key={section.titleKey} className="flex flex-col gap-0.5">
               {/* Category Header or Divider */}
               {!isCollapsed ? (
                 <div className="px-3 pt-2 pb-1">
                   <span className="text-[10px] uppercase font-bold text-on-surface-variant/60 tracking-wider">
-                    {section.title}
+                    {t(section.titleKey)}
                   </span>
                 </div>
               ) : (
@@ -300,68 +302,87 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
 
               {/* Navigation Items */}
-              {section.items.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={handleLinkClick}
-                  onMouseEnter={(e) => handleMouseEnter(e, item, section.title)}
-                  onMouseLeave={handleMouseLeave}
-                  className={({ isActive }) =>
-                    `group relative flex items-center rounded-xl transition-all duration-150 ${
-                      isCollapsed
-                        ? 'justify-center w-11 h-11 mx-auto my-0.5'
-                        : 'gap-3 px-3 py-2.5 mx-1 font-label-md text-xs'
-                    } ${
-                      isActive
-                        ? 'bg-primary/10 text-primary font-bold shadow-xs'
-                        : 'text-on-surface-variant hover:bg-surface-container-high/60 hover:text-on-surface'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {/* Left active glowing indicator bar */}
-                      {isActive && (
+              {section.items.map((item) => {
+                const label = t(item.labelKey);
+                const desc = t(item.descKey);
+                const badge = item.badgeKey ? t(item.badgeKey) : undefined;
+                const category = t(section.titleKey);
+
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={handleLinkClick}
+                    onMouseEnter={(e) =>
+                      handleMouseEnter(
+                        e,
+                        {
+                          label,
+                          description: desc,
+                          icon: item.icon,
+                          badge,
+                          badgeColor: item.badgeColor,
+                        },
+                        category
+                      )
+                    }
+                    onMouseLeave={handleMouseLeave}
+                    className={({ isActive }) =>
+                      `group relative flex items-center rounded-xl transition-all duration-150 ${
+                        isCollapsed
+                          ? 'justify-center w-11 h-11 mx-auto my-0.5'
+                          : 'gap-3 px-3 py-2.5 mx-1 font-label-md text-xs'
+                      } ${
+                        isActive
+                          ? 'bg-primary/10 text-primary font-bold shadow-xs'
+                          : 'text-on-surface-variant hover:bg-surface-container-high/60 hover:text-on-surface'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {/* Left active glowing indicator bar */}
+                        {isActive && (
+                          <span
+                            className={`absolute left-0 top-1/2 -translate-y-1/2 bg-primary rounded-r-full transition-all ${
+                              isCollapsed ? 'w-1 h-6 left-0' : 'w-1 h-5 left-0'
+                            }`}
+                          />
+                        )}
+
+                        {/* Icon */}
                         <span
-                          className={`absolute left-0 top-1/2 -translate-y-1/2 bg-primary rounded-r-full transition-all ${
-                            isCollapsed ? 'w-1 h-6 left-0' : 'w-1 h-5 left-0'
+                          className={`material-symbols-outlined transition-transform duration-150 ${
+                            isCollapsed ? 'text-[22px]' : 'text-[20px]'
+                          } ${
+                            isActive
+                              ? 'material-symbols-filled text-primary'
+                              : 'group-hover:scale-110 group-hover:text-primary'
                           }`}
-                        />
-                      )}
+                        >
+                          {item.icon}
+                        </span>
 
-                      {/* Icon */}
-                      <span
-                        className={`material-symbols-outlined transition-transform duration-150 ${
-                          isCollapsed ? 'text-[22px]' : 'text-[20px]'
-                        } ${
-                          isActive
-                            ? 'material-symbols-filled text-primary'
-                            : 'group-hover:scale-110 group-hover:text-primary'
-                        }`}
-                      >
-                        {item.icon}
-                      </span>
-
-                      {/* Label & Badge (Expanded Mode) */}
-                      {!isCollapsed && (
-                        <div className="flex-1 flex items-center justify-between min-w-0 overflow-hidden">
-                          <span className="truncate">{item.label}</span>
-                          {item.badge && (
-                            <span
-                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
-                                item.badgeColor || 'bg-surface-container text-on-surface'
-                              }`}
-                            >
-                              {item.badge}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+                        {/* Label & Badge (Expanded Mode) */}
+                        {!isCollapsed && (
+                          <div className="flex-1 flex items-center justify-between min-w-0 overflow-hidden">
+                            <span className="truncate">{label}</span>
+                            {badge && (
+                              <span
+                                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+                                  item.badgeColor || 'bg-surface-container text-on-surface'
+                                }`}
+                              >
+                                {badge}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
             </div>
           ))}
         </nav>
@@ -375,10 +396,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 RO
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold text-on-surface truncate leading-tight">Chief Controller</p>
+                <p className="text-[11px] font-bold text-on-surface truncate leading-tight">
+                  {t('topbar.chief_controller')}
+                </p>
                 <p className="text-[9px] text-emerald-600 font-semibold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  NCR Sector Online
+                  {t('badge.sector_online')}
                 </p>
               </div>
             </div>
@@ -391,27 +414,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
               handleMouseEnter(
                 e,
                 {
-                  label: isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar',
+                  label: isCollapsed ? t('nav.expand_sidebar') : t('nav.collapse_sidebar'),
                   icon: isCollapsed ? 'chevron_right' : 'chevron_left',
-                  description: 'Toggle sidebar size (Keyboard shortcut: [ )',
-                  badge: 'Shortcut [',
+                  description: t('desc.toggle_sidebar'),
+                  badge: t('badge.shortcut'),
                   badgeColor: 'bg-white/20 text-white',
                 },
-                'View Control'
+                t('nav.view_control')
               )
             }
             onMouseLeave={handleMouseLeave}
             className={`hidden md:flex items-center justify-center rounded-xl p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container transition-all ${
               isCollapsed ? 'w-11 h-10 mx-auto' : 'w-full gap-2 text-xs font-semibold'
             }`}
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={isCollapsed ? t('nav.expand_sidebar') : t('nav.collapse_sidebar')}
           >
             <span className="material-symbols-outlined text-[18px]">
               {isCollapsed ? 'chevron_right' : 'chevron_left'}
             </span>
             {!isCollapsed && (
               <span className="text-xs text-on-surface-variant flex items-center justify-between flex-1">
-                <span>Collapse Sidebar</span>
+                <span>{t('nav.collapse_sidebar')}</span>
                 <kbd className="px-1.5 py-0.5 text-[10px] bg-surface-container rounded border border-outline-variant/30 font-mono">
                   [
                 </kbd>
