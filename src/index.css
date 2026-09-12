@@ -2,25 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Google Fonts ───────────────────────────────────────────── */
+/* Inter + JetBrains Mono + Noto Devanagari loaded via index.html */
+
 @layer base {
   :root {
     color-scheme: light;
+    /* Operational accent for focus rings */
+    --focus-ring: #0369a1;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: #f8f9ff;
-    color: #0b1c30;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #f0f4f9;
+    color: #0f172a;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Better focus ring for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Table defaults */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 600;
   }
 }
 
-/* Material Symbols configuration */
+/* ── Material Symbols ──────────────────────────────────────── */
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
+  font-family: "Material Symbols Outlined";
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -28,64 +65,90 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: 'liga';
+  -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   user-select: none;
+  vertical-align: middle;
 }
 
 .material-symbols-filled {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24 !important;
 }
 
-/* Custom visual utilities from Design System */
+/* ── Operational Component Utilities ───────────────────────── */
+
+/* Data table row accent */
+.table-row-hover:hover {
+  background-color: rgba(3, 105, 161, 0.04);
+  cursor: pointer;
+}
+
+/* Left-border accent strip pattern */
+.ops-border-critical {
+  border-left: 3px solid #dc2626;
+}
+.ops-border-warn {
+  border-left: 3px solid #d97706;
+}
+.ops-border-ok {
+  border-left: 3px solid #16a34a;
+}
+.ops-border-info {
+  border-left: 3px solid #2563eb;
+}
+.ops-border-ai {
+  border-left: 3px solid #7c3aed;
+}
+
+/* Legacy compatibility helpers */
 .ai-border-accent {
-  border-left: 4px solid #67bafd;
+  border-left: 3px solid #38b2f7;
 }
-
 .ai-card-border {
-  border-left: 4px solid #7c3aed;
+  border-left: 3px solid #7c3aed;
 }
 
+/* Glass panel (kept for backward compat, reduced intensity) */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(196, 198, 207, 0.3);
-  box-shadow: 0 4px 24px -4px rgba(27, 54, 93, 0.08);
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
+/* Gradient text */
 .ai-gradient-text {
-  background: linear-gradient(135deg, #006399 0%, #67bafd 100%);
+  background: linear-gradient(135deg, #0369a1 0%, #38b2f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+/* Prediction gradient (used in ETAOverviewHero) */
 .prediction-gradient {
-  background: linear-gradient(135deg, #1b365d 0%, #006399 100%);
+  background: linear-gradient(135deg, #001b3d 0%, #0369a1 100%);
 }
 
+/* Ambient shadow */
 .ambient-shadow {
-  box-shadow: 0 4px 20px -2px rgba(27, 54, 93, 0.06);
+  box-shadow: 0 2px 12px -2px rgba(15, 23, 42, 0.05);
 }
 
-/* Custom Scrollbar */
+/* ── Scrollbar Styling ──────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #f1f5f9;
-  border-radius: 4px;
+  border-radius: 3px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #c4c6cf;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 3px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #74777f;
+  background: #94a3b8;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -96,27 +159,98 @@
   scrollbar-width: none;
 }
 
-/* Animations */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.75; transform: scale(1.05); }
+/* ── Operational Data Typography ───────────────────────────── */
+.data-value {
+  font-family: "JetBrains Mono", "ui-monospace", monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Section label style (used in tables and cards) */
+.ops-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
-@keyframes bar-grow {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+/* ── Status Dot ─────────────────────────────────────────────── */
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot-live {
+  animation: livePulse 2s ease-in-out infinite;
 }
 
+@keyframes livePulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes pingSlow {
+  0% { transform: scale(1); opacity: 0.8; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+.animate-ping-slow {
+  animation: pingSlow 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  transform-origin: center;
+}
+
+/* ── Chart Animation ────────────────────────────────────────── */
 .chart-bar-animation {
   transform-origin: bottom;
-  animation: bar-grow 0.8s ease-out forwards;
+  animation: barGrow 0.6s ease-out forwards;
 }
 
-/* Zebra Striping */
+@keyframes barGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* ── Transition Helpers ─────────────────────────────────────── */
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 120ms;
+}
+
+/* ── Zebra Table Striping ────────────────────────────────────── */
 .table-row-zebra:nth-child(even) {
-  background-color: rgba(241, 245, 249, 0.4);
+  background-color: rgba(240, 244, 249, 0.6);
+}
+
+/* ── Toasts (fixed positioning base) ────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+}
+
+.toast-item {
+  pointer-events: auto;
+  animation: slideInRight 0.2s ease-out both;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Print Styles ────────────────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
 }

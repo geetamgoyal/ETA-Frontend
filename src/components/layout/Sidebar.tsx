@@ -103,6 +103,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: 'analytics',
           descKey: 'desc.analytics',
         },
+        {
+          to: '/historical-performance',
+          labelKey: 'nav.historical_performance',
+          icon: 'history',
+          descKey: 'desc.historical_performance',
+        },
       ],
     },
     {

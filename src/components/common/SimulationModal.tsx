@@ -1,28 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
-import { MOCK_TRAINS } from '../../data/trains';
+import { useTrains } from '../../context/TrainContext';
+import { useAlerts } from '../../context/AlertContext';
 import { SimulationResult } from '../../types/simulation';
 
 interface SimulationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  targetTrainId?: string;
 }
 
-export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClose }) => {
+export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClose, targetTrainId }) => {
   const { t, language } = useLanguage();
-  const [selectedTrainId, setSelectedTrainId] = useState(MOCK_TRAINS[0].id);
+  const { trains, applyOperationalDisruption } = useTrains();
+  const { addAlert } = useAlerts();
+
+  const [selectedTrainId, setSelectedTrainId] = useState(targetTrainId || trains[0]?.id || '12309');
   const [scenarioType, setScenarioType] = useState<'signal_failure' | 'track_maintenance' | 'weather_disruption' | 'speed_boost' | 'priority_overtake'>('track_maintenance');
   const [impactZone, setImpactZone] = useState('Kanpur – Prayagraj');
   const [intensityMinutes, setIntensityMinutes] = useState(15);
   const [isSimulating, setIsSimulating] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
 
+  useEffect(() => {
+    if (targetTrainId) {
+      setSelectedTrainId(targetTrainId);
+    }
+  }, [targetTrainId]);
+
   if (!isOpen) return null;
 
   const handleRunSimulation = () => {
     setIsSimulating(true);
     setTimeout(() => {
-      const train = MOCK_TRAINS.find((t) => t.id === selectedTrainId) || MOCK_TRAINS[0];
+      const train = trains.find((t) => t.id === selectedTrainId) || trains[0];
       let delta = 0;
       let summary = '';
 
@@ -112,7 +123,7 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
               onChange={(e) => setSelectedTrainId(e.target.value)}
               className="w-full p-2.5 bg-surface-container-low border border-outline-variant/50 rounded-lg font-body-md text-on-surface focus:outline-none focus:border-secondary"
             >
-              {MOCK_TRAINS.map((train) => (
+              {trains.map((train) => (
                 <option key={train.id} value={train.id}>
                   {train.trainNumber} - {train.trainName} ({train.source} → {train.destination})
                 </option>
@@ -256,13 +267,59 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-surface border-t border-outline-variant/20 flex justify-end gap-3">
+        <div className="p-4 bg-surface border-t border-outline-variant/20 flex flex-wrap items-center justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors"
+            className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors cursor-pointer"
           >
             {t('sim.close')}
           </button>
+
+          {result && (
+            <button
+              onClick={() => {
+                const targetTrain = trains.find((t) => t.id === selectedTrainId) || trains[0];
+                applyOperationalDisruption(targetTrain.id, {
+                  scenarioType,
+                  delayDeltaMinutes: result.delayDeltaMinutes,
+                  impactZone,
+                  summary: result.impactSummary,
+                });
+
+                if (result.delayDeltaMinutes > 0) {
+                  addAlert({
+                    severity: result.delayDeltaMinutes >= 20 ? 'CRITICAL' : 'HIGH',
+                    category: scenarioType === 'signal_failure' ? 'Signal' : scenarioType === 'track_maintenance' ? 'Caution Order' : 'Congestion',
+                    trainNumber: targetTrain.trainNumber,
+                    trainName: targetTrain.trainName,
+                    location: `${impactZone} (Simulated Event)`,
+                    routeSection: targetTrain.zone || impactZone,
+                    eventDescription: result.impactSummary,
+                    detectionTime: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    timeAgo: 'Just now',
+                    currentDelay: Math.max(0, targetTrain.currentDelayMinutes + result.delayDeltaMinutes),
+                    scheduledEta: targetTrain.previousEta,
+                    predictedEta: result.simulatedEta,
+                    etaImpact: `+${result.delayDeltaMinutes} min dynamic arrival delay`,
+                    status: 'Active',
+                    aiRecommendation: `Investigate block spacing and dispatch priority clearing for train #${targetTrain.trainNumber} on ${impactZone}.`,
+                    zone: targetTrain.zone,
+                    speedKmH: result.delayDeltaMinutes >= 20 ? 0 : 30,
+                    timeline: [
+                      { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), event: `Disruption scenario activated: ${result.impactSummary}`, type: 'critical' },
+                      { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), event: `Dynamic ETA recalculated to ${result.simulatedEta}`, type: 'recalculation' },
+                    ],
+                  });
+                }
+
+                onClose();
+              }}
+              className="px-5 py-2 rounded-lg bg-secondary hover:bg-secondary/90 text-white font-label-md text-label-md font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[18px]">publish</span>
+              <span>Apply Scenario to Live Fleet →</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

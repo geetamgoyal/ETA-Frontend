@@ -1,4 +1,39 @@
-import { Train } from '../types/train';
+import { Train, EtaHistoryPoint } from '../types/train';
+
+/** Generate synthetic ETA history for a train over the past 2 hours */
+function makeHistory(
+  scheduledEta: string,
+  baseDelayMins: number,
+  recovering: boolean,
+): EtaHistoryPoint[] {
+  const [hh, mm] = scheduledEta.split(':').map(Number);
+  const base = hh * 60 + mm;
+  const points: EtaHistoryPoint[] = [];
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+
+  const steps = [120, 90, 60, 40, 20, 0]; // minutes ago
+  steps.forEach((ago) => {
+    const factor = ago / 120;
+    const delayAtTime = recovering
+      ? baseDelayMins + Math.round(factor * 15)
+      : baseDelayMins - Math.round(factor * 5);
+    const etaMins = base + delayAtTime;
+    const etaH = Math.floor(etaMins / 60) % 24;
+    const etaM = etaMins % 60;
+    const confAtTime = Math.min(99, Math.max(72, 100 - 20 * factor));
+    const tAgo = nowMins - ago;
+    const tH = Math.floor(tAgo / 60) % 24;
+    const tM = tAgo % 60;
+    points.push({
+      timestamp: `${String(tH).padStart(2, '0')}:${String(tM).padStart(2, '0')}`,
+      predictedEta: `${String(etaH).padStart(2, '0')}:${String(etaM).padStart(2, '0')}`,
+      delayMinutes: delayAtTime,
+      confidence: Math.round(confAtTime),
+    });
+  });
+  return points;
+}
 
 export const MOCK_TRAINS: Train[] = [
   {
@@ -19,6 +54,9 @@ export const MOCK_TRAINS: Train[] = [
     confidencePercent: 94,
     status: 'Recovering',
     zone: 'North Central Railway (NCR)',
+    direction: 'Down (New Delhi → Howrah)',
+    distanceToNextStationKm: 195,
+    operationalStatusText: 'Running with predicted delay',
     routeCoordinates: { x: 350, y: 200 },
     totalDistanceKm: 1143,
     remainingDistanceKm: 201,
@@ -111,6 +149,8 @@ export const MOCK_TRAINS: Train[] = [
       { id: 'e3', timestamp: '52m ago', description: 'Speed reduction due to signal clearance ahead', type: 'slowdown' },
       { id: 'e4', timestamp: '1h 15m ago', description: 'Scheduled operational crew change completed', type: 'halt' },
     ],
+    etaHistory: makeHistory('18:30', 18, true),
+    lastUpdatedAt: new Date().toISOString(),
   },
   {
     id: '12002',
@@ -130,6 +170,9 @@ export const MOCK_TRAINS: Train[] = [
     confidencePercent: 98,
     status: 'On Time',
     zone: 'North Central Railway (NCR)',
+    direction: 'Down (New Delhi → Rani Kamlapati)',
+    distanceToNextStationKm: 118,
+    operationalStatusText: 'Running on schedule',
     routeCoordinates: { x: 250, y: 170 },
     totalDistanceKm: 708,
     remainingDistanceKm: 509,
@@ -204,6 +247,8 @@ export const MOCK_TRAINS: Train[] = [
         platform: 'PF 5',
       },
     ],
+    etaHistory: makeHistory('14:20', 0, false),
+    lastUpdatedAt: new Date().toISOString(),
   },
   {
     id: '12050',
@@ -223,6 +268,9 @@ export const MOCK_TRAINS: Train[] = [
     confidencePercent: 85,
     status: 'Critical Delay',
     zone: 'Northern Railway (NR)',
+    direction: 'Down (Hazrat Nizamuddin → VGL Jhansi)',
+    distanceToNextStationKm: 54,
+    operationalStatusText: 'Running with critical delay',
     routeCoordinates: { x: 450, y: 165 },
     totalDistanceKm: 403,
     remainingDistanceKm: 260,
@@ -295,6 +343,13 @@ export const MOCK_TRAINS: Train[] = [
         status: 'Destination',
       },
     ],
+    etaHistory: makeHistory('12:35', 45, false),
+    lastUpdatedAt: new Date().toISOString(),
+    recentEvents: [
+      { id: 'e1', timestamp: '2m ago',  description: 'Unusual stoppage detected near Mathura Jn — track clearance pending', type: 'halt' },
+      { id: 'e2', timestamp: '22m ago', description: 'Signal interlocking delay at Mathura Outer', type: 'slowdown' },
+      { id: 'e3', timestamp: '48m ago', description: 'Departed Hazrat Nizamuddin on time', type: 'departure' },
+    ],
   },
   {
     id: '12951',
@@ -314,6 +369,9 @@ export const MOCK_TRAINS: Train[] = [
     confidencePercent: 88,
     status: 'Minor Delay',
     zone: 'West Central Railway (WCR)',
+    direction: 'Up (Delhi → Mumbai Central)',
+    distanceToNextStationKm: 108,
+    operationalStatusText: 'Running with predicted delay',
     routeCoordinates: { x: 650, y: 200 },
     totalDistanceKm: 1384,
     remainingDistanceKm: 465,
@@ -354,6 +412,12 @@ export const MOCK_TRAINS: Train[] = [
         status: 'Destination',
       },
     ],
+    etaHistory: makeHistory('08:15', 22, false),
+    lastUpdatedAt: new Date().toISOString(),
+    recentEvents: [
+      { id: 'e1', timestamp: '5m ago',  description: 'Crossing Kota at 110 km/h — on recovery trajectory', type: 'departure' },
+      { id: 'e2', timestamp: '35m ago', description: 'Route clearance received for Kota–Sawai Madhopur block', type: 'recovery' },
+    ],
   },
   {
     id: '22436',
@@ -373,6 +437,9 @@ export const MOCK_TRAINS: Train[] = [
     confidencePercent: 95,
     status: 'Minor Delay',
     zone: 'North Central Railway (NCR)',
+    direction: 'Down (New Delhi → Varanasi)',
+    distanceToNextStationKm: 124,
+    operationalStatusText: 'Running with predicted delay',
     routeCoordinates: { x: 550, y: 150 },
     totalDistanceKm: 759,
     remainingDistanceKm: 124,
@@ -424,6 +491,12 @@ export const MOCK_TRAINS: Train[] = [
         status: 'Destination',
       },
     ],
+    etaHistory: makeHistory('16:20', 8, false),
+    lastUpdatedAt: new Date().toISOString(),
+    recentEvents: [
+      { id: 'e1', timestamp: '3m ago',  description: 'Arrived Prayagraj Jn — 8 min late', type: 'departure' },
+      { id: 'e2', timestamp: '25m ago', description: 'Speed maintained at 120 km/h on NCR section', type: 'recovery' },
+    ],
   },
   {
     id: '12274',
@@ -443,6 +516,9 @@ export const MOCK_TRAINS: Train[] = [
     confidencePercent: 96,
     status: 'On Time',
     zone: 'Eastern Railway (ER)',
+    direction: 'Down (New Delhi → Howrah)',
+    distanceToNextStationKm: 18,
+    operationalStatusText: 'Running on schedule',
     routeCoordinates: { x: 750, y: 250 },
     totalDistanceKm: 1451,
     remainingDistanceKm: 691,
@@ -483,5 +559,12 @@ export const MOCK_TRAINS: Train[] = [
         status: 'Destination',
       },
     ],
+    etaHistory: makeHistory('21:10', 0, false),
+    lastUpdatedAt: new Date().toISOString(),
+    recentEvents: [
+      { id: 'e1', timestamp: '8m ago',  description: 'Arrived Varanasi Jn on schedule — excellent run', type: 'departure' },
+      { id: 'e2', timestamp: '1h ago',  description: 'Maintaining 115 km/h average — no delay risk', type: 'recovery' },
+    ],
   },
 ];
+

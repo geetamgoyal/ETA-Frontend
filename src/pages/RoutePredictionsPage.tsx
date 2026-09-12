@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { JourneyVisualizer } from '../components/routes/JourneyVisualizer';
 import { RouteSummaryKPIs } from '../components/routes/RouteSummaryKPIs';
@@ -7,14 +7,21 @@ import { DelayPropagationChart } from '../components/routes/DelayPropagationChar
 import { RouteRiskPanel } from '../components/routes/RouteRiskPanel';
 import { AIRecommendationsPanel } from '../components/routes/AIRecommendationsPanel';
 import { Footer } from '../components/layout/Footer';
-import { MOCK_TRAINS } from '../data/trains';
+import { useTrains } from '../context/TrainContext';
 
 export const RoutePredictionsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [selectedTrainId, setSelectedTrainId] = useState(id || '12309');
+  const { trains, selectedTrainId, setSelectedTrainId } = useTrains();
 
-  const train = MOCK_TRAINS.find((t) => t.id === selectedTrainId) || MOCK_TRAINS[0];
+  React.useEffect(() => {
+    if (id && id !== selectedTrainId) {
+      setSelectedTrainId(id);
+    }
+  }, [id]);
+
+  const effectiveId = id ?? selectedTrainId;
+  const train = trains.find((t) => t.id === effectiveId) ?? trains[0];
 
   const handleTrainChange = (newId: string) => {
     setSelectedTrainId(newId);
@@ -22,97 +29,91 @@ export const RoutePredictionsPage: React.FC = () => {
   };
 
   return (
-    <main className="px-4 md:px-margin py-6 pb-xl flex-1 flex flex-col gap-lg max-w-[1440px] mx-auto w-full animate-fade-in">
-      {/* Breadcrumb & Header */}
+    <main className="px-4 md:px-margin py-5 pb-xl flex-1 flex flex-col gap-4 max-w-[1440px] mx-auto w-full animate-fade-in">
+      {/* Header */}
       <div>
-        <div className="flex items-center gap-2 text-on-surface-variant font-label-md text-xs mb-3">
+        <div className="flex items-center gap-2 text-on-surface-variant text-[11px] mb-3">
           <button
             onClick={() => navigate(`/eta-forecast/${train.id}`)}
             className="flex items-center hover:text-primary transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-sm mr-1">arrow_back</span>
+            <span className="material-symbols-outlined text-[14px] mr-1">arrow_back</span>
             Back to AI ETA Forecast
           </button>
           <span className="text-outline-variant">|</span>
-          <button onClick={() => navigate(`/train/${train.id}`)} className="hover:text-primary cursor-pointer">
+          <button
+            onClick={() => navigate(`/train-monitoring/${train.id}`)}
+            className="hover:text-primary cursor-pointer"
+          >
             Live Train Details
           </button>
-          <span className="material-symbols-outlined text-xs">chevron_right</span>
+          <span className="material-symbols-outlined text-[12px]">chevron_right</span>
           <span className="text-primary font-bold">Route Predictions</span>
         </div>
 
         <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="font-headline-lg text-headline-lg font-bold text-primary">
-                Route Predictions
-              </h2>
-              <div className="flex items-center gap-2 bg-surface border border-outline-variant/40 rounded-lg px-2.5 py-1 shadow-xs">
+              <h2 className="text-headline-lg font-bold text-primary">Route Predictions</h2>
+              <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-2.5 py-1 shadow-xs">
                 <span className="material-symbols-outlined text-secondary text-[18px]">train</span>
                 <select
-                  value={selectedTrainId}
+                  value={effectiveId}
                   onChange={(e) => handleTrainChange(e.target.value)}
-                  className="bg-transparent font-bold text-xs text-primary outline-none cursor-pointer"
+                  className="bg-transparent font-bold text-[12px] text-primary outline-none cursor-pointer"
                 >
-                  {MOCK_TRAINS.map((t) => (
+                  {trains.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.trainNumber} - {t.trainName}
+                      {t.trainNumber} — {t.trainName}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
-            <p className="font-body-lg text-xs text-on-surface-variant mt-0.5">
-              Station-by-station AI forecast for the remaining journey of {train.trainName} ({train.trainNumber})
+            <p className="text-[12px] text-on-surface-variant mt-0.5">
+              Station-by-station AI forecast for {train.trainName} ({train.trainNumber})
             </p>
           </div>
-
-          <div className="flex flex-col items-start md:items-end gap-1">
-            <div className="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded-full border border-outline-variant/30">
-              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-              <span className="font-label-md text-xs text-primary font-bold tracking-widest">
-                LIVE PREDICTION
-              </span>
-            </div>
-            <p className="font-label-md text-[11px] text-on-surface-variant">Last updated: 12 seconds ago</p>
+          <div className="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-outline-variant/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse-subtle" />
+            <span className="text-[11px] font-bold text-primary tracking-wider">LIVE PREDICTION</span>
           </div>
         </div>
       </div>
 
-      {/* Top Remaining Journey Linear Track Visualizer */}
-      <JourneyVisualizer />
+      {/* Journey visualizer — now data-driven */}
+      <JourneyVisualizer train={train} />
 
-      {/* Route Summary KPI Cards */}
-      <RouteSummaryKPIs />
+      {/* Route KPIs — now data-driven */}
+      <RouteSummaryKPIs train={train} />
 
-      {/* Main 2-Column Split: Table + SVG Chart (Left 2 cols) | Risks + Recommendations (Right 1 col) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-4">
-        <div className="lg:col-span-2 flex flex-col gap-6">
+      {/* Main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 flex flex-col gap-4">
           <StationByStationTable stations={train.stations} />
           <DelayPropagationChart />
         </div>
-
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <RouteRiskPanel />
           <AIRecommendationsPanel />
         </div>
       </div>
 
-      {/* Bottom Actions Bar */}
-      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 pt-4 border-t border-outline-variant/20">
+      {/* Bottom actions */}
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-outline-variant/20">
         <button
-          onClick={() => navigate(`/train/${train.id}`)}
-          className="bg-surface hover:bg-surface-variant text-primary border border-outline-variant/50 font-label-md text-xs font-bold py-2.5 px-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+          onClick={() => navigate(`/train-monitoring/${train.id}`)}
+          className="bg-surface-container-lowest hover:bg-surface-container text-primary border border-outline-variant font-semibold text-[12px] py-2 px-5 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
-          <span className="material-symbols-outlined text-sm">train</span>
+          <span className="material-symbols-outlined text-[16px]">train</span>
           View Live Train Details
         </button>
         <button
-          onClick={() => alert(`Dynamic AI model recalibrated for train ${train.trainNumber} across all downstream blocks.`)}
-          className="bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-xs font-bold py-2.5 px-6 rounded-lg flex items-center justify-center gap-2 transition-all shadow-ambient cursor-pointer"
+          onClick={() => navigate(`/eta-forecast/${train.id}`)}
+          className="bg-secondary hover:bg-secondary/90 text-white font-semibold text-[12px] py-2 px-5 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
-          <span className="material-symbols-outlined text-sm">refresh</span>
-          Refresh AI Prediction
+          <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+          AI ETA Forecast
         </button>
       </div>
 

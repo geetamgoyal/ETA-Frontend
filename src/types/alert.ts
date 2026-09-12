@@ -1,4 +1,45 @@
-export type AlertSeverity = 'CRITICAL' | 'HIGH' | 'WARNING' | 'RECOVERY' | 'NETWORK' | 'INFO';
+export type AlertSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'WARNING' | 'RECOVERY' | 'NETWORK' | 'INFO';
+
+export type IncidentCategory =
+  | 'Signal'
+  | 'Congestion'
+  | 'Stoppage'
+  | 'ETA Deviation'
+  | 'Station Dwell'
+  | 'Caution Order';
+
+export type AlertStatus = 'Active' | 'Acknowledged' | 'Resolved';
+
+export interface IncidentTimelineItem {
+  time: string;
+  event: string;
+  type?: 'normal' | 'signal' | 'slowdown' | 'recalculation' | 'critical' | 'recovery';
+}
+
+export interface IncidentAlert {
+  id: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  category: IncidentCategory;
+  trainNumber?: string;
+  trainName?: string;
+  location: string;
+  routeSection: string;
+  eventDescription: string;
+  detectionTime: string;
+  timeAgo: string;
+  currentDelay: number;
+  scheduledEta: string;
+  predictedEta: string;
+  etaImpact: string;
+  status: AlertStatus;
+  aiRecommendation: string;
+  timeline: IncidentTimelineItem[];
+  zone?: string;
+  speedKmH?: number;
+  acknowledgedAt?: string;
+  acknowledgedBy?: string;
+  resolvedAt?: string;
+}
 
 export interface OperationalAlert {
   id: string;

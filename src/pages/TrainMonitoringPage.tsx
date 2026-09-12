@@ -5,12 +5,13 @@ import { TrainSearchFilter } from '../components/trains/TrainSearchFilter';
 import { TrainDataTable } from '../components/trains/TrainDataTable';
 import { AIActiveInsightsSidebar } from '../components/trains/AIActiveInsightsSidebar';
 import { Footer } from '../components/layout/Footer';
-import { MOCK_TRAINS } from '../data/trains';
+import { useTrains } from '../context/TrainContext';
 
 export const TrainMonitoringPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [activeFilter, setActiveFilter] = useState('all');
+  const { trains } = useTrains();
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -19,7 +20,7 @@ export const TrainMonitoringPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  const filteredTrains = MOCK_TRAINS.filter((train) => {
+  const filteredTrains = trains.filter((train) => {
     // Search text filter
     const matchesSearch =
       train.trainName.toLowerCase().includes(searchTerm.toLowerCase()) ||

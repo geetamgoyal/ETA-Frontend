@@ -1,93 +1,186 @@
 import React from 'react';
+import { Train } from '../../types/train';
+import { clsx } from 'clsx';
 
-export const PredictionConfidencePanel: React.FC = () => {
+interface PredictionConfidencePanelProps {
+  train: Train;
+}
+
+export const PredictionConfidencePanel: React.FC<PredictionConfidencePanelProps> = ({ train }) => {
+  const conf = train.confidencePercent;
+  const history = train.etaHistory ?? [];
+
+  // Confidence color tier
+  const confColor =
+    conf >= 90 ? { bar: '#16a34a', text: 'text-status-ok-text', bg: 'bg-status-ok-bg', label: 'High Confidence' }
+    : conf >= 78 ? { bar: '#d97706', text: 'text-status-warn-text', bg: 'bg-status-warn-bg', label: 'Moderate Confidence' }
+    : { bar: '#dc2626', text: 'text-status-critical-text', bg: 'bg-status-critical-bg', label: 'Low Confidence' };
+
+  // Factors contributing to confidence
+  const factors = [
+    {
+      label: 'GPS Signal Quality',
+      value: conf >= 90 ? 99 : conf >= 78 ? 92 : 78,
+      icon: 'satellite_alt',
+      status: conf >= 78 ? 'ok' : 'warn',
+    },
+    {
+      label: 'Interlocking Telemetry',
+      value: conf >= 90 ? 98 : 94,
+      icon: 'device_hub',
+      status: 'ok',
+    },
+    {
+      label: 'Historical Accuracy',
+      value: conf >= 90 ? 97 : conf >= 78 ? 89 : 82,
+      icon: 'history',
+      status: conf >= 78 ? 'ok' : 'warn',
+    },
+    {
+      label: 'Congestion Forecast',
+      value: conf >= 90 ? 94 : conf >= 78 ? 86 : 74,
+      icon: 'traffic',
+      status: conf >= 85 ? 'ok' : conf >= 78 ? 'warn' : 'critical',
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Prediction Confidence Score */}
-      <section className="bg-white rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm">
-        <div className="bg-surface-container-high p-4 border-b border-outline-variant/20">
-          <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
-            Prediction Confidence Score
+    <div className="flex flex-col gap-4">
+      {/* Main confidence card */}
+      <div className="bg-surface-container-lowest rounded-lg border border-outline-variant/60 overflow-hidden">
+        <div className="px-4 py-3 border-b border-outline-variant/40">
+          <h4 className="text-[13px] font-bold text-on-surface flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-status-ai">psychology</span>
+            AI Confidence Score
           </h4>
+          <p className="text-[11px] text-on-surface-variant mt-0.5">
+            Prediction reliability for {train.trainName}
+          </p>
         </div>
-        <div className="p-5 space-y-5">
-          <div className="text-center">
-            <div className="text-4xl font-black text-primary font-mono-data">94%</div>
-            <div className="text-xs font-bold text-secondary uppercase tracking-wider mt-1">
-              High Confidence
-            </div>
-          </div>
 
-          <div className="w-full bg-surface-container-low h-3 rounded-full overflow-hidden border border-outline-variant/20">
-            <div className="bg-secondary h-full rounded-full transition-all duration-700" style={{ width: '94%' }}></div>
-          </div>
-
-          <div className="space-y-2.5 pt-2 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-on-surface-variant">Data Quality</span>
-              <span className="font-bold text-secondary">Excellent</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-on-surface-variant">Live Telemetry Availability</span>
-              <span className="font-bold text-on-surface">98%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-on-surface-variant">Pattern Match Strength</span>
-              <span className="font-bold text-on-surface">91%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-on-surface-variant">Route Block Visibility</span>
-              <span className="font-bold text-on-surface">High</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Operational Insights */}
-      <section className="bg-white rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm">
-        <div className="bg-surface-container-high p-4 border-b border-outline-variant/20">
-          <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
-            AI Operational Insights
-          </h4>
-        </div>
-        <div className="p-4 space-y-3">
-          <div className="flex items-start gap-3 p-3 bg-secondary-container/10 rounded-lg border border-secondary-container/30">
-            <span className="material-symbols-outlined text-secondary material-symbols-filled text-[20px]">
-              trending_down
+        <div className="p-4">
+          {/* Big confidence number */}
+          <div className="flex items-end gap-3 mb-3">
+            <span
+              className="data-value text-[3rem] font-black leading-none"
+              style={{ color: confColor.bar }}
+            >
+              {conf}
             </span>
-            <div>
-              <p className="text-xs font-bold text-on-surface">Delay Recovery Likely</p>
-              <p className="text-[11px] text-on-surface-variant mt-0.5">
-                78% probability of regaining 5+ mins on current stretch.
+            <div className="mb-1">
+              <span className="text-[18px] font-bold text-on-surface-variant">%</span>
+              <p
+                className={clsx(
+                  'text-[11px] font-bold px-2 py-0.5 rounded mt-1',
+                  confColor.bg,
+                  confColor.text,
+                )}
+              >
+                {confColor.label}
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
-            <span className="material-symbols-outlined text-green-700 material-symbols-filled text-[20px]">
-              check_circle
-            </span>
-            <div>
-              <p className="text-xs font-bold text-green-900">Low ETA Risk</p>
-              <p className="text-[11px] text-green-800 mt-0.5">
-                No major signal failures or weather disruptions predicted.
-              </p>
-            </div>
+          {/* Confidence bar */}
+          <div className="h-2 bg-surface-container rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${conf}%`, backgroundColor: confColor.bar }}
+            />
           </div>
 
-          <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <span className="material-symbols-outlined text-amber-700 material-symbols-filled text-[20px]">
-              info
-            </span>
-            <div>
-              <p className="text-xs font-bold text-amber-900">Monitor Upcoming Halt</p>
-              <p className="text-[11px] text-amber-800 mt-0.5">
-                Medium risk of platform congestion at Varanasi Jn.
+          {/* ETA Range */}
+          <div className="flex items-center justify-between p-3 bg-surface-container rounded-lg">
+            <div className="text-center">
+              <p className="ops-label mb-1">Earliest</p>
+              <p className="data-value text-[16px] font-bold text-on-surface">
+                {train.expectedEtaRange.min}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="ops-label mb-1">AI Predicted</p>
+              <p
+                className="data-value text-[20px] font-black"
+                style={{ color: confColor.bar }}
+              >
+                {train.aiPredictedEta}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="ops-label mb-1">Latest</p>
+              <p className="data-value text-[16px] font-bold text-on-surface">
+                {train.expectedEtaRange.max}
               </p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Factor breakdown */}
+      <div className="bg-surface-container-lowest rounded-lg border border-outline-variant/60 overflow-hidden">
+        <div className="px-4 py-3 border-b border-outline-variant/40">
+          <h4 className="text-[13px] font-bold text-on-surface">Confidence Factors</h4>
+        </div>
+        <div className="p-4 flex flex-col gap-3">
+          {factors.map((f) => (
+            <div key={f.label} className="flex items-center gap-3">
+              <span
+                className={clsx(
+                  'material-symbols-outlined text-[16px] flex-shrink-0',
+                  f.status === 'ok'       ? 'text-status-ok'
+                  : f.status === 'warn'   ? 'text-status-warn'
+                  : 'text-status-critical',
+                )}
+              >
+                {f.icon}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-medium text-on-surface truncate">{f.label}</span>
+                  <span className="data-value text-[11px] font-bold text-on-surface-variant ml-2">
+                    {f.value}%
+                  </span>
+                </div>
+                <div className="h-1.5 bg-surface-container rounded-full overflow-hidden">
+                  <div
+                    className={clsx(
+                      'h-full rounded-full',
+                      f.status === 'ok'       ? 'bg-status-ok'
+                      : f.status === 'warn'   ? 'bg-status-warn'
+                      : 'bg-status-critical',
+                    )}
+                    style={{ width: `${f.value}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Confidence trend mini */}
+      {history.length >= 3 && (
+        <div className="bg-surface-container-lowest rounded-lg border border-outline-variant/60 p-4">
+          <p className="ops-label mb-2">Confidence over last {history.length} updates</p>
+          <div className="flex items-end gap-1 h-10">
+            {history.slice(-8).map((pt, i) => {
+              const h = (pt.confidence / 100) * 40;
+              const isLast = i === history.slice(-8).length - 1;
+              return (
+                <div
+                  key={i}
+                  className={clsx(
+                    'flex-1 rounded-sm transition-all duration-300',
+                    isLast ? 'bg-secondary' : 'bg-surface-container-high',
+                  )}
+                  style={{ height: `${h}px` }}
+                  title={`${pt.timestamp}: ${pt.confidence}%`}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

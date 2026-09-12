@@ -3,9 +3,10 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopNavbar } from './TopNavbar';
 import { SimulationModal } from '../common/SimulationModal';
+import { useTrains } from '../../context/TrainContext';
 
 export const AppLayout: React.FC = () => {
-  const [isSimulationOpen, setIsSimulationOpen] = useState(false);
+  const { isSimulationModalOpen, simulationModalTrainId, openSimulationModal, closeSimulationModal } = useTrains();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Persistent desktop collapsed state
@@ -57,9 +58,9 @@ export const AppLayout: React.FC = () => {
 
   return (
     <div className="bg-background text-on-surface font-body-md min-h-screen flex">
-      {/* 3-Line Fixed / Collapsible Left Navigation Sidebar */}
+      {/* Global Collapsible / Flyout Navigation Sidebar */}
       <Sidebar
-        onOpenSimulation={() => setIsSimulationOpen(true)}
+        onOpenSimulation={() => openSimulationModal()}
         isOpenMobile={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
         isCollapsed={isCollapsed}
@@ -86,8 +87,9 @@ export const AppLayout: React.FC = () => {
 
       {/* Interactive Simulation Modal */}
       <SimulationModal
-        isOpen={isSimulationOpen}
-        onClose={() => setIsSimulationOpen(false)}
+        isOpen={isSimulationModalOpen}
+        targetTrainId={simulationModalTrainId}
+        onClose={closeSimulationModal}
       />
     </div>
   );

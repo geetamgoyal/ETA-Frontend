@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAlerts } from '../../context/AlertContext';
+import { useTrains } from '../../context/TrainContext';
 
 interface TopNavbarProps {
   isCollapsed?: boolean;
@@ -15,8 +17,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 }) => {
   const navigate = useNavigate();
   const { language, toggleLanguage, t } = useLanguage();
+  const { alerts, setSelectedAlertId } = useAlerts();
+  const { trains } = useTrains();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const activeAlerts = alerts.filter((a) => a.status === 'Active');
+  const criticalCount = activeAlerts.filter((a) => a.severity === 'CRITICAL').length;
 
   const handleToggle = () => {
     if (onToggleMenu) {
@@ -28,8 +35,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/train-monitoring?q=${encodeURIComponent(searchTerm.trim())}`);
+    const query = searchTerm.trim();
+    if (!query) return;
+
+    // Check if query matches a train number or ID
+    const matchingTrain = trains.find(
+      (t) => t.trainNumber.toLowerCase() === query.toLowerCase() || t.id.toLowerCase() === query.toLowerCase()
+    );
+
+    if (matchingTrain) {
+      navigate(`/train/${matchingTrain.id}`);
+    } else {
+      navigate(`/train-monitoring?q=${encodeURIComponent(query)}`);
     }
   };
 
@@ -126,59 +143,68 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-full transition-colors relative"
+            className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-full transition-colors relative cursor-pointer"
             title={t('topbar.alerts_title')}
             aria-label="Notifications"
           >
             <span className="material-symbols-outlined text-[20px]">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface animate-ping"></span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+            {activeAlerts.length > 0 && (
+              <>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface animate-ping"></span>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+              </>
+            )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl p-3 z-50 animate-fade-in">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl p-3 z-50 animate-fade-in">
               <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20 mb-2">
                 <span className="font-label-md text-xs font-bold text-primary">{t('topbar.alerts_title')}</span>
                 <span className="text-[10px] text-error font-semibold bg-error-container/50 px-1.5 py-0.5 rounded">
-                  {t('topbar.critical_count')}
+                  {criticalCount > 0 ? `${criticalCount} Critical` : `${activeAlerts.length} Active`}
                 </span>
               </div>
-              <div className="space-y-2 text-xs">
-                <div
-                  onClick={() => {
-                    navigate('/alerts');
-                    setShowNotifications(false);
-                  }}
-                  className="p-2 rounded-lg bg-error-container/20 hover:bg-error-container/40 cursor-pointer transition-colors"
-                >
-                  <p className="font-bold text-error">
-                    {language === 'hi' ? 'असामान्य ठहराव: ट्रेन 12050' : 'Unusual stoppage: Tr. 12050'}
+              <div className="space-y-2 text-xs max-h-64 overflow-y-auto custom-scrollbar">
+                {activeAlerts.length === 0 ? (
+                  <p className="text-center py-4 text-on-surface-variant text-xs">
+                    No active incident alerts. Network operating smoothly.
                   </p>
-                  <p className="text-on-surface-variant mt-0.5">
-                    {language === 'hi' ? 'मथुरा/झांसी के निकट (0 किमी/घंटा)' : 'Near Mathura/Jhansi (0 km/h)'}
-                  </p>
-                </div>
-                <div
-                  onClick={() => {
-                    navigate('/alerts');
-                    setShowNotifications(false);
-                  }}
-                  className="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors"
-                >
-                  <p className="font-semibold text-on-surface">
-                    {language === 'hi' ? 'देरी रिकवरी: ट्रेन 12309' : 'Delay Recovery: Tr. 12309'}
-                  </p>
-                  <p className="text-on-surface-variant mt-0.5">
-                    {language === 'hi' ? 'कानपुर के पास 4 मिनट की भरपाई' : 'Recovered 4 min near Kanpur'}
-                  </p>
-                </div>
+                ) : (
+                  activeAlerts.slice(0, 4).map((alt) => (
+                    <div
+                      key={alt.id}
+                      onClick={() => {
+                        setSelectedAlertId(alt.id);
+                        navigate('/alerts');
+                        setShowNotifications(false);
+                      }}
+                      className={`p-2.5 rounded-lg cursor-pointer transition-colors ${
+                        alt.severity === 'CRITICAL'
+                          ? 'bg-error-container/20 hover:bg-error-container/40 border border-error/20'
+                          : 'bg-surface-container-low hover:bg-surface-container border border-outline-variant/20'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`font-bold ${alt.severity === 'CRITICAL' ? 'text-error' : 'text-on-surface'}`}>
+                          {alt.category} {alt.trainNumber ? `· #${alt.trainNumber}` : ''}
+                        </span>
+                        <span className="text-[10px] font-mono text-on-surface-variant">
+                          {alt.timeAgo || alt.detectionTime}
+                        </span>
+                      </div>
+                      <p className="text-on-surface-variant mt-0.5 text-[11px] line-clamp-2">
+                        {alt.eventDescription}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
               <button
                 onClick={() => {
                   navigate('/alerts');
                   setShowNotifications(false);
                 }}
-                className="w-full text-center text-[11px] font-semibold text-secondary hover:underline pt-2 mt-2 border-t border-outline-variant/20 block"
+                className="w-full mt-2.5 pt-2 border-t border-outline-variant/20 text-center font-label-md text-xs text-secondary hover:text-secondary-container font-semibold block transition-colors cursor-pointer"
               >
                 {t('topbar.view_all_alerts')}
               </button>
