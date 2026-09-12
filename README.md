@@ -5,7 +5,6 @@
 ---
 
 ## 🚆 Overview
-
 **RailForecast AI** provides real-time train telemetry, dynamic ETA prediction with neural factor decomposition, network-wide congestion analysis, and automated operational risk mitigation for railway controllers and dispatchers.
 
 ---
