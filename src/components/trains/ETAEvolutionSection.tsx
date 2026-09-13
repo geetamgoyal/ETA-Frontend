@@ -141,19 +141,37 @@ export const ETAEvolutionSection: React.FC<ETAEvolutionSectionProps> = ({ train 
             </linearGradient>
           </defs>
 
-          {/* Grid lines */}
-          {[0.25, 0.5, 0.75].map((pct) => (
-            <line
-              key={pct}
-              x1={PAD.left}
-              y1={PAD.top + chartH * pct}
-              x2={PAD.left + chartW}
-              y2={PAD.top + chartH * pct}
-              stroke="#1e3a5f"
-              strokeWidth="0.8"
-              strokeDasharray="3 3"
-            />
-          ))}
+          {/* Grid lines and Y-axis time scale */}
+          {[0.2, 0.5, 0.8].map((pct) => {
+            const mins = Math.round(maxMins - pct * rangeMins);
+            const h = Math.floor(mins / 60) % 24;
+            const m = mins % 60;
+            const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            const y = PAD.top + chartH * pct;
+            return (
+              <g key={pct}>
+                <line
+                  x1={PAD.left}
+                  y1={y}
+                  x2={PAD.left + chartW}
+                  y2={y}
+                  stroke="#1e3a5f"
+                  strokeWidth="0.8"
+                  strokeDasharray="3 3"
+                />
+                <text
+                  x={PAD.left - 6}
+                  y={y + 3}
+                  fill="#64748b"
+                  fontSize="9"
+                  textAnchor="end"
+                  fontFamily="monospace"
+                >
+                  {timeStr}
+                </text>
+              </g>
+            );
+          })}
 
           {/* Scheduled Baseline (Dashed horizontal line) */}
           <line

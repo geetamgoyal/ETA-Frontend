@@ -1,6 +1,25 @@
 import React from 'react';
+import { useTrains } from '../../context/TrainContext';
 
 export const TrainMonitoringMetrics: React.FC = () => {
+  const { trains } = useTrains();
+
+  const total = trains.length;
+  const onTime = trains.filter(
+    (t) => t.currentDelayMinutes === 0 || t.status === 'On Time'
+  ).length;
+  const minorDelays = trains.filter(
+    (t) => t.currentDelayMinutes > 0 && t.currentDelayMinutes < 30
+  ).length;
+  const criticalRisks = trains.filter(
+    (t) =>
+      t.currentDelayMinutes >= 30 ||
+      t.status.toLowerCase().includes('critical') ||
+      t.status === 'Delayed'
+  ).length;
+
+  const onTimePercent = total > 0 ? Math.round((onTime / total) * 100) : 100;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-md mb-lg">
       {/* Total Monitored */}
@@ -13,9 +32,9 @@ export const TrainMonitoringMetrics: React.FC = () => {
         </div>
         <div className="flex items-end gap-2">
           <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-primary">
-            128
+            {total}
           </span>
-          <span className="font-body-md text-sm text-on-surface-variant mb-1">Active</span>
+          <span className="font-body-md text-xs text-on-surface-variant mb-1 font-semibold">Active Corridors</span>
         </div>
       </div>
 
@@ -29,10 +48,10 @@ export const TrainMonitoringMetrics: React.FC = () => {
         </div>
         <div className="flex items-end gap-2">
           <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-on-surface">
-            82
+            {onTime}
           </span>
           <span className="font-body-md text-[#0f766e] mb-1 font-semibold bg-[#ccfbf1] px-2 py-0.5 rounded text-xs">
-            64%
+            {onTimePercent}%
           </span>
         </div>
       </div>
@@ -47,7 +66,7 @@ export const TrainMonitoringMetrics: React.FC = () => {
         </div>
         <div className="flex items-end gap-2">
           <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-on-surface">
-            34
+            {minorDelays}
           </span>
           <span className="font-body-md text-[#b45309] mb-1 font-semibold bg-[#fef3c7] px-2 py-0.5 rounded text-xs">
             &lt; 30m
@@ -68,10 +87,10 @@ export const TrainMonitoringMetrics: React.FC = () => {
         </div>
         <div className="flex items-end gap-2 pl-2">
           <span className="font-display-lg text-headline-lg lg:text-display-lg font-bold text-error">
-            12
+            {criticalRisks}
           </span>
           <span className="font-body-md text-error mb-1 font-bold bg-error-container px-2 py-0.5 rounded text-xs">
-            Require Action
+            {criticalRisks > 0 ? 'Require Action' : 'Clear'}
           </span>
         </div>
       </div>

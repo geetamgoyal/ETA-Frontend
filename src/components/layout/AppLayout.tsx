@@ -3,10 +3,13 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopNavbar } from './TopNavbar';
 import { SimulationModal } from '../common/SimulationModal';
+import { DemoControlBar } from '../demo/DemoControlBar';
 import { useTrains } from '../../context/TrainContext';
+import { useDemo } from '../../context/DemoContext';
 
 export const AppLayout: React.FC = () => {
   const { isSimulationModalOpen, simulationModalTrainId, openSimulationModal, closeSimulationModal } = useTrains();
+  const { isDemoActive, isBarMinimized } = useDemo();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Persistent desktop collapsed state
@@ -80,7 +83,7 @@ export const AppLayout: React.FC = () => {
         />
 
         {/* Scrollable Page Content Canvas */}
-        <div className="pt-16 flex-1 flex flex-col">
+        <div className={`pt-16 ${isDemoActive && !isBarMinimized ? 'pb-28' : 'pb-8 md:pb-10'} flex-1 flex flex-col`}>
           <Outlet />
         </div>
       </div>
@@ -91,6 +94,9 @@ export const AppLayout: React.FC = () => {
         targetTrainId={simulationModalTrainId}
         onClose={closeSimulationModal}
       />
+
+      {/* Persistent SIH Deterministic Demo Controller */}
+      <DemoControlBar />
     </div>
   );
 };

@@ -6,18 +6,26 @@ export const SystemStatusPage: React.FC = () => {
   return (
     <main className="px-4 md:px-margin py-6 pb-xl flex-1 flex flex-col gap-lg max-w-[1440px] mx-auto w-full animate-fade-in">
       {/* Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between md:items-end gap-3">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 uppercase font-mono">
+              Prototype / Simulation Spec
+            </span>
+            <span className="text-[10px] font-bold text-on-surface-variant font-mono">
+              SIH-1644
+            </span>
+          </div>
           <h2 className="font-headline-lg text-headline-lg font-bold text-on-surface">
-            System Status & Telemetry Pipelines
+            Target System Architecture &amp; Telemetry Pipelines
           </h2>
           <p className="font-body-lg text-xs text-on-surface-variant mt-0.5">
-            Real-time health monitoring of AI neural inference clusters, GPS feeds and interlocking telemetry
+            Architecture and telemetry interface specifications evaluated on simulated Indian Railways schemas
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-[#ecfdf5] text-[#059669] px-3 py-1.5 rounded-full border border-[#a7f3d0] font-label-md text-xs font-bold">
+        <div className="flex items-center gap-2 bg-[#ecfdf5] text-[#059669] px-3 py-1.5 rounded-full border border-[#a7f3d0] font-label-md text-xs font-bold self-start md:self-auto">
           <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
-          ALL SYSTEMS OPERATIONAL
+          SIMULATED PIPELINES ACTIVE
         </div>
       </div>
 
@@ -25,12 +33,12 @@ export const SystemStatusPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
         <div className="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/30 shadow-sm flex flex-col justify-between">
           <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
-            Cluster Availability
+            Cluster Target Availability
           </span>
           <div className="flex items-baseline gap-1 mt-2">
             <span className="font-display-lg text-3xl font-black text-primary font-mono-data">99.98%</span>
           </div>
-          <span className="text-xs text-accent-green font-semibold mt-1">0 failover events in 30d</span>
+          <span className="text-xs text-accent-green font-semibold mt-1">High-availability target SLA</span>
         </div>
 
         <div className="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/30 shadow-sm flex flex-col justify-between">
@@ -45,24 +53,24 @@ export const SystemStatusPage: React.FC = () => {
 
         <div className="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/30 shadow-sm flex flex-col justify-between">
           <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
-            Active GPS Streams
+            Simulated Streams
           </span>
           <div className="flex items-baseline gap-1 mt-2">
-            <span className="font-display-lg text-3xl font-black text-on-surface font-mono-data">128</span>
+            <span className="font-display-lg text-3xl font-black text-on-surface font-mono-data">6 Active</span>
           </div>
-          <span className="text-xs text-on-surface-variant mt-1">100% locos emitting NavIC signal</span>
+          <span className="text-xs text-on-surface-variant mt-1">Simulated NavIC RTIS format</span>
         </div>
 
         <div className="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/30 shadow-sm flex flex-col justify-between">
           <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
-            Model Deployment
+            Model Version
           </span>
           <div className="flex items-baseline gap-1 mt-2">
             <span className="font-headline-sm text-lg font-black text-primary font-mono-data">
               v4.2.0-rf-coaching
             </span>
           </div>
-          <span className="text-xs text-on-surface-variant mt-1">Deployed Aug 2026 • Hot reload verified</span>
+          <span className="text-xs text-on-surface-variant mt-1">Prototype Build • Local inference validated</span>
         </div>
       </div>
 
@@ -71,9 +79,9 @@ export const SystemStatusPage: React.FC = () => {
         <div className="p-4 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-low/50">
           <h3 className="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary">memory</span>
-            AI Neural Inference Cluster Nodes
+            AI Neural Inference Cluster Topologies (Target Architecture)
           </h3>
-          <span className="text-xs font-mono-data text-on-surface-variant">5 Nodes Provisioned</span>
+          <span className="text-xs font-mono-data text-on-surface-variant">5 Nodes Specified</span>
         </div>
 
         <div className="overflow-x-auto">
@@ -133,9 +141,9 @@ export const SystemStatusPage: React.FC = () => {
         <div className="p-4 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-low/50">
           <h3 className="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary">sensors</span>
-            Railway Telemetry Ingestion Feeds
+            Railway Telemetry Ingestion Feeds (Simulated Pipeline Schemas)
           </h3>
-          <span className="text-xs font-mono-data text-on-surface-variant">Active Pipelines</span>
+          <span className="text-xs font-mono-data text-on-surface-variant">Validated Schemas</span>
         </div>
 
         <div className="overflow-x-auto">

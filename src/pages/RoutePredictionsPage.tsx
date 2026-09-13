@@ -91,11 +91,11 @@ export const RoutePredictionsPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-4">
           <StationByStationTable stations={train.stations} />
-          <DelayPropagationChart />
+          <DelayPropagationChart train={train} />
         </div>
         <div className="flex flex-col gap-4">
-          <RouteRiskPanel />
-          <AIRecommendationsPanel />
+          <RouteRiskPanel train={train} />
+          <AIRecommendationsPanel train={train} />
         </div>
       </div>
 

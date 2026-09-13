@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTrains } from '../../context/TrainContext';
+import { useAlerts } from '../../context/AlertContext';
 
 interface SidebarProps {
   onOpenSimulation: () => void;
@@ -15,6 +17,7 @@ interface NavItem {
   labelKey: string;
   icon: string;
   descKey: string;
+  badge?: string;
   badgeKey?: string;
   badgeColor?: string;
 }
@@ -42,7 +45,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
 }) => {
   const { t } = useLanguage();
+  const { trains } = useTrains();
+  const { alerts } = useAlerts();
   const [activeTooltip, setActiveTooltip] = useState<TooltipState | null>(null);
+
+  const activeTrainsCount = trains.length;
+  const criticalAlertsCount = alerts.filter(
+    (a) => a.severity.toLowerCase() === 'critical' && a.status !== 'Resolved'
+  ).length;
 
   const navSections: NavSection[] = [
     {
@@ -59,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           labelKey: 'nav.train_monitoring',
           icon: 'train',
           descKey: 'desc.train_monitoring',
-          badgeKey: 'badge.12_live',
+          badge: `${activeTrainsCount} Active`,
           badgeColor: 'bg-primary/10 text-primary',
         },
         {
@@ -94,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           labelKey: 'nav.alerts',
           icon: 'notifications_active',
           descKey: 'desc.alerts',
-          badgeKey: 'badge.3_critical',
+          badge: criticalAlertsCount > 0 ? `${criticalAlertsCount} Critical` : undefined,
           badgeColor: 'bg-red-500 text-white',
         },
         {
@@ -311,7 +321,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {section.items.map((item) => {
                 const label = t(item.labelKey);
                 const desc = t(item.descKey);
-                const badge = item.badgeKey ? t(item.badgeKey) : undefined;
+                const badge = item.badge !== undefined ? item.badge : item.badgeKey ? t(item.badgeKey) : undefined;
                 const category = t(section.titleKey);
 
                 return (

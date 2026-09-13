@@ -9,8 +9,8 @@ export const MOCK_CLUSTER_NODES: SystemClusterNode[] = [
 ];
 
 export const MOCK_TELEMETRY_FEEDS: TelemetryFeed[] = [
-  { id: 'feed-1', name: 'Locomotive RTIS / GPS SatCom Stream', source: 'ISRO GAGAN NavIC', type: 'GPS', status: 'HEALTHY', latency: '420ms', lastPacketTime: 'Just now' },
-  { id: 'feed-2', name: 'Electronic Interlocking (EI) Block Telemetry', source: 'NCR S&T Div', type: 'Signaling / Interlocking', status: 'HEALTHY', latency: '120ms', lastPacketTime: 'Just now' },
-  { id: 'feed-3', name: 'Traction SCADA / OHE Voltage Sensors', source: 'Central Grid NCR', type: 'OHE / Traction', status: 'HEALTHY', latency: '250ms', lastPacketTime: '2s ago' },
-  { id: 'feed-4', name: 'Doppler Weather & Fog Radar Network', source: 'IMD North India', type: 'Weather Radar', status: 'HEALTHY', latency: '1.2s', lastPacketTime: '5s ago' },
+  { id: 'feed-1', name: 'Locomotive RTIS / GPS SatCom Stream', source: 'Simulated NavIC / RTIS Data Feed', type: 'GPS', status: 'HEALTHY', latency: '420ms', lastPacketTime: 'Just now' },
+  { id: 'feed-2', name: 'Electronic Interlocking (EI) Block Telemetry', source: 'Simulated NCR Interlocking Schema', type: 'Signaling / Interlocking', status: 'HEALTHY', latency: '120ms', lastPacketTime: 'Just now' },
+  { id: 'feed-3', name: 'Traction SCADA / OHE Voltage Sensors', source: 'Simulated Traction Grid Telemetry', type: 'OHE / Traction', status: 'HEALTHY', latency: '250ms', lastPacketTime: '2s ago' },
+  { id: 'feed-4', name: 'Doppler Weather & Fog Visibility Feed', source: 'Simulated IMD Visibility Radar Feed', type: 'Weather Radar', status: 'HEALTHY', latency: '1.2s', lastPacketTime: '5s ago' },
 ];

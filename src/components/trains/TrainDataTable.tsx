@@ -150,28 +150,18 @@ export const TrainDataTable: React.FC<TrainDataTableProps> = ({ trains }) => {
         </table>
       </div>
 
-      {/* Pagination Footer */}
-      <div className="px-margin py-3 border-t border-outline-variant/30 flex justify-between items-center bg-surface">
-        <span className="font-body-md text-xs text-on-surface-variant">
-          Showing 1 to {trains.length} of 128 entries
-        </span>
-        <div className="flex items-center gap-1">
-          <button className="p-1 rounded hover:bg-surface-variant text-on-surface-variant disabled:opacity-40" disabled>
-            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-          </button>
-          <button className="w-7 h-7 rounded bg-primary text-on-primary font-body-md text-xs font-bold flex items-center justify-center">
-            1
-          </button>
-          <button className="w-7 h-7 rounded hover:bg-surface-variant text-on-surface font-body-md text-xs flex items-center justify-center transition-colors">
-            2
-          </button>
-          <button className="w-7 h-7 rounded hover:bg-surface-variant text-on-surface font-body-md text-xs flex items-center justify-center transition-colors">
-            3
-          </button>
-          <span className="text-on-surface-variant text-xs">...</span>
-          <button className="p-1 rounded hover:bg-surface-variant text-on-surface-variant">
-            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-          </button>
+      {/* Table Footer */}
+      <div className="px-margin py-3 border-t border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-2 bg-surface">
+        <div className="flex items-center gap-2">
+          <span className="font-body-md text-xs text-on-surface-variant">
+            Showing {trains.length} active coaching corridors
+          </span>
+          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            Prototype Fleet Feed
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-on-surface-variant font-medium">
+          <span>Page 1 of 1</span>
         </div>
       </div>
     </div>

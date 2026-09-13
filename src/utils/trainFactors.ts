@@ -14,11 +14,30 @@ export interface PrototypeDelayFactor {
 
 export interface TrainDelayFactorAnalysis {
   trainId: string;
+  initialDelayMinutes: number;
+  dynamicAdjustmentMinutes: number;
+  finalForecastDelayMinutes: number;
+  scheduledEta: string;
+  predictedDynamicEta: string;
+  conventionalEta: string;
+  deltaVsConventionalMinutes: number;
   factors: PrototypeDelayFactor[];
   totalFactorDelta: number;
-  finalForecastDelayMinutes: number;
   isSimulated: boolean;
   disclaimer: string;
+}
+
+export function parseTimeMins(t: string): number {
+  if (!t || !t.includes(':')) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+export function formatTimeMins(mins: number): string {
+  const normalized = ((mins % 1440) + 1440) % 1440;
+  const h = Math.floor(normalized / 60);
+  const m = normalized % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
 /**
@@ -26,7 +45,7 @@ export interface TrainDelayFactorAnalysis {
  * based on the train's active operational state and simulation telemetry.
  */
 export function getTrainDelayFactors(train: Train): TrainDelayFactorAnalysis {
-  const delay = train.currentDelayMinutes;
+  const delay = Math.max(0, train.currentDelayMinutes);
   const speed = train.currentSpeedKmH;
   const maxSpeed = train.maxSpeedKmH;
   const isCritical = delay > 25 || train.status === 'Critical Delay';
@@ -127,7 +146,26 @@ export function getTrainDelayFactors(train: Train): TrainDelayFactorAnalysis {
 
   // Calculate final forecast delay: initial delay + sum of dynamic operational adjustments
   const dynamicAdjustments = speedImpact + srtImpact + dwellImpact + congestionImpact + restrictionImpact;
-  const finalDelay = Math.max(0, delay + (isRecovering ? Math.min(-2, dynamicAdjustments) : dynamicAdjustments));
+  const schedMins = parseTimeMins(train.previousEta);
+  const conventionalEta = formatTimeMins(schedMins + delay);
+
+  let finalDelay: number;
+  let predictedDynamicEta: string;
+
+  if (train.aiPredictedEta) {
+    predictedDynamicEta = train.aiPredictedEta;
+    const predMins = parseTimeMins(train.aiPredictedEta);
+    finalDelay = Math.max(0, predMins >= schedMins ? predMins - schedMins : predMins + 1440 - schedMins);
+  } else {
+    finalDelay = Math.max(0, delay + (isRecovering ? Math.min(-2, dynamicAdjustments) : dynamicAdjustments));
+    if (isOnTime) {
+      finalDelay = 0;
+    }
+    predictedDynamicEta = formatTimeMins(schedMins + finalDelay);
+  }
+
+  const dynamicAdjustmentMinutes = finalDelay - delay;
+  const deltaVsConventionalMinutes = finalDelay - delay;
 
   const factors: PrototypeDelayFactor[] = [
     {
@@ -200,9 +238,15 @@ export function getTrainDelayFactors(train: Train): TrainDelayFactorAnalysis {
 
   return {
     trainId: train.id,
+    initialDelayMinutes: delay,
+    dynamicAdjustmentMinutes,
+    finalForecastDelayMinutes: finalDelay,
+    scheduledEta: train.previousEta,
+    predictedDynamicEta,
+    conventionalEta,
+    deltaVsConventionalMinutes,
     factors,
     totalFactorDelta: dynamicAdjustments,
-    finalForecastDelayMinutes: finalDelay,
     isSimulated: true,
     disclaimer: 'Prototype Delay Decomposition: Values are computed dynamically from block telemetry and operational railway scheduling constraints for SIH prototype evaluation.',
   };

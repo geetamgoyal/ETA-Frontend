@@ -46,6 +46,10 @@ interface TrainContextType {
   openSimulationModal: (trainId?: string) => void;
   closeSimulationModal: () => void;
   applyOperationalDisruption: (trainId: string, event: DisruptionEventInput) => void;
+  applyDemoStepData: (trainId: string, updates: Partial<Train>) => void;
+  resetFleetToNominal: () => void;
+  isDemoActive: boolean;
+  setIsDemoActive: (active: boolean) => void;
 
   // Toast system
   toasts: ToastMessage[];
@@ -299,6 +303,12 @@ export const TrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     selectedTrainIdRef.current = selectedTrainId;
   }, [selectedTrainId]);
 
+  const [isDemoActive, setIsDemoActive] = useState(false);
+  const isDemoActiveRef = useRef(false);
+  useEffect(() => {
+    isDemoActiveRef.current = isDemoActive;
+  }, [isDemoActive]);
+
   // ── Simulation loop: runs every 20 seconds ─────────────────────────────────
   useEffect(() => {
     const interval = setInterval(() => {
@@ -322,6 +332,9 @@ export const TrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         const updatedTrains = prevTrains.map((train, idx) => {
           if (!indices.has(idx)) return train;
+          // Protect demo train from random background fluctuations when in Demo Mode
+          if (isDemoActiveRef.current && train.id === '12309') return train;
+
           const { updated, toast } = simulateTrain(train, tick);
           if (toast) pendingToasts.push(toast);
           return updated;
@@ -409,6 +422,19 @@ export const TrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           finalForecastDelayMinutes: newDelay,
         };
 
+        // Propagate delay downstream to upcoming stations
+        const updatedStations = train.stations.map((st) => {
+          if (st.status === 'Departed') return st;
+          const stSchedMins = parseTime(st.scheduledArrival);
+          const newStationDelay = Math.max(0, st.predictedDelayMinutes + event.delayDeltaMinutes);
+          const newStationEta = formatTime(stSchedMins + newStationDelay);
+          return {
+            ...st,
+            predictedDelayMinutes: newStationDelay,
+            actualOrPredictedArrival: newStationEta,
+          };
+        });
+
         return {
           ...train,
           currentDelayMinutes: newDelay,
@@ -417,6 +443,7 @@ export const TrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           currentSpeedKmH: newSpeed,
           operationalStatusText: event.summary,
           factors: updatedFactors,
+          stations: updatedStations,
           recentEvents: [newEvent, ...(train.recentEvents ?? []).slice(0, 5)],
           etaHistory: [...train.etaHistory, newHistoryTick],
           lastUpdatedAt: new Date().toISOString(),
@@ -431,6 +458,34 @@ export const TrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       title: `Operational Scenario Activated`,
       body: `${event.summary} Dynamic ETA recalculated.`,
       duration: 6000,
+    });
+  }, [addToast]);
+
+  const applyDemoStepData = useCallback((trainId: string, updates: Partial<Train>) => {
+    setIsDemoActive(true);
+    setTrains((prev) =>
+      prev.map((t) => {
+        if (t.id !== trainId && t.trainNumber !== trainId) return t;
+        return {
+          ...t,
+          ...updates,
+          lastUpdatedAt: new Date().toISOString(),
+        };
+      })
+    );
+    setLastUpdatedAt(new Date());
+  }, []);
+
+  const resetFleetToNominal = useCallback(() => {
+    setIsDemoActive(false);
+    setTrains(MOCK_TRAINS);
+    setSimulationTick(0);
+    setLastUpdatedAt(new Date());
+    addToast({
+      severity: 'ok',
+      title: 'Fleet State Restored',
+      body: 'All coaching trains reset to baseline Working Timetable (WTT) schedule.',
+      duration: 4000,
     });
   }, [addToast]);
 
@@ -450,6 +505,10 @@ export const TrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     openSimulationModal,
     closeSimulationModal,
     applyOperationalDisruption,
+    applyDemoStepData,
+    resetFleetToNominal,
+    isDemoActive,
+    setIsDemoActive,
     toasts,
     addToast,
     dismissToast,

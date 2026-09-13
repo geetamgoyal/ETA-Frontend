@@ -12,7 +12,7 @@ interface SimulationModalProps {
 
 export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClose, targetTrainId }) => {
   const { t, language } = useLanguage();
-  const { trains, applyOperationalDisruption } = useTrains();
+  const { trains, applyOperationalDisruption, resetFleetToNominal } = useTrains();
   const { addAlert } = useAlerts();
 
   const [selectedTrainId, setSelectedTrainId] = useState(targetTrainId || trains[0]?.id || '12309');
@@ -267,13 +267,26 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-surface border-t border-outline-variant/20 flex flex-wrap items-center justify-end gap-3">
+        <div className="p-4 bg-surface border-t border-outline-variant/20 flex flex-wrap items-center justify-between gap-3">
           <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors cursor-pointer"
+            onClick={() => {
+              resetFleetToNominal();
+              onClose();
+            }}
+            className="px-3.5 py-2 rounded-lg border border-error/30 bg-error/10 hover:bg-error/20 text-error font-label-md text-label-md font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Restore all trains to nominal timetable baseline"
           >
-            {t('sim.close')}
+            <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+            <span>{language === 'hi' ? 'फ्लीट रीसेट करें' : 'Reset Fleet to Baseline'}</span>
           </button>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors cursor-pointer"
+            >
+              {t('sim.close')}
+            </button>
 
           {result && (
             <button
@@ -320,6 +333,7 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({ isOpen, onClos
               <span>Apply Scenario to Live Fleet →</span>
             </button>
           )}
+          </div>
         </div>
       </div>
     </div>

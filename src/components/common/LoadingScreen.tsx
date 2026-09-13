@@ -15,46 +15,46 @@ interface InitStep {
 const INITIALIZATION_STEPS: InitStep[] = [
   {
     id: 'network',
-    label: 'Connecting to Railway Network',
-    sublabel: 'Establishing secure link to CRIS & Indian Railways telemetry',
+    label: 'Connecting to Railway Telemetry Hub',
+    sublabel: 'Ingesting simulated feeds conforming to IR CRIS & RTIS telemetry protocols',
     threshold: 18,
   },
   {
     id: 'train_data',
-    label: 'Loading Live Train Data',
-    sublabel: 'Ingesting real-time GPS & section occupancy feeds',
+    label: 'Loading Monitored Fleet Corridors',
+    sublabel: 'Parsing high-density Northern & North Central coaching streams',
     threshold: 40,
   },
   {
     id: 'conditions',
-    label: 'Analyzing Operational Conditions',
-    sublabel: 'Processing speed restrictions, gradients & weather variables',
+    label: 'Analyzing Operational Constraints',
+    sublabel: 'Processing TSR speed restrictions, block headways & gradient variables',
     threshold: 65,
   },
   {
     id: 'ai_engine',
-    label: 'Initializing AI ETA Engine',
-    sublabel: 'Calibrating neural delay propagation models',
+    label: 'Initializing Dynamic ETA AI Engine',
+    sublabel: 'Evaluating feature factors: section speed recovery vs cascade delays',
     threshold: 88,
   },
   {
     id: 'dashboard',
-    label: 'Preparing Operational Dashboard',
-    sublabel: 'Generating real-time intelligence visuals & dispatch hub',
+    label: 'Launching Dispatch Intelligence Hub',
+    sublabel: 'Generating real-time interactive dispatch visualizer',
     threshold: 100,
   },
 ];
 
 const ROUTE_NODES = [
-  { id: 'data', label: 'Live Data', sub: 'NavIC / CRIS', pos: 0 },
-  { id: 'track', label: 'Track State', sub: 'Interlocking', pos: 33 },
-  { id: 'ai', label: 'AI Processing', sub: 'Neural Engine', pos: 66 },
-  { id: 'eta', label: 'ETA Prediction', sub: 'Live Dispatch', pos: 100 },
+  { id: 'data', label: 'Telemetry', sub: 'RTIS / GPS Schema', pos: 0 },
+  { id: 'track', label: 'Section Interlocking', sub: 'Block Signals', pos: 33 },
+  { id: 'ai', label: 'Dynamic ETA AI', sub: 'Factor Engine', pos: 66 },
+  { id: 'eta', label: 'Dispatcher Hub', sub: 'Actionable ETA', pos: 100 },
 ];
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   onComplete,
-  durationMs = 3800,
+  durationMs = 2200,
 }) => {
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
@@ -156,8 +156,23 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             AI Operations Gateway
           </span>
         </div>
-        <div className="font-mono text-xs text-[#87a0cd]/70 border border-[#1b365d] bg-[#002046]/60 px-3 py-1 rounded-full backdrop-blur-xs">
-          Smart India Hackathon • SIH-1644
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:block font-mono text-xs text-[#87a0cd]/70 border border-[#1b365d] bg-[#002046]/60 px-3 py-1 rounded-full backdrop-blur-xs">
+            Smart India Hackathon • SIH-1644
+          </div>
+          <button
+            onClick={() => {
+              setIsFadingOut(true);
+              setTimeout(() => {
+                setIsRendered(false);
+                if (onComplete) onComplete();
+              }, 150);
+            }}
+            className="font-mono text-xs text-[#67bafd] hover:text-white bg-[#002046] hover:bg-[#1b365d] border border-[#67bafd]/40 px-3 py-1 rounded-full transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span>Skip Intro</span>
+            <span className="material-symbols-outlined text-[14px]">fast_forward</span>
+          </button>
         </div>
       </div>
 

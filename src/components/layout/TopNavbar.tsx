@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAlerts } from '../../context/AlertContext';
 import { useTrains } from '../../context/TrainContext';
+import { useDemo } from '../../context/DemoContext';
+import { trainService } from '../../services/trainService';
 
 interface TopNavbarProps {
   isCollapsed?: boolean;
@@ -19,11 +21,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   const { language, toggleLanguage, t } = useLanguage();
   const { alerts, setSelectedAlertId } = useAlerts();
   const { trains } = useTrains();
+  const { isDemoActive, currentStepDef, activateDemo, closeDemo, resetDemo } = useDemo();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
 
   const activeAlerts = alerts.filter((a) => a.status === 'Active');
   const criticalCount = activeAlerts.filter((a) => a.severity === 'CRITICAL').length;
+  const connectionStatus = trainService.getConnectionStatus();
 
   const handleToggle = () => {
     if (onToggleMenu) {
@@ -58,8 +62,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           : 'w-full md:w-[calc(100%-16rem)]'
       }`}
     >
-      {/* Left: 3-Line Hamburger Menu Toggle + Live Status */}
-      <div className="flex items-center gap-3">
+      {/* Left: 3-Line Hamburger Menu Toggle + Status + Demo Controls */}
+      <div className="flex items-center gap-2.5">
         {/* 3-Line Hamburger Button (Visible on all screen sizes) */}
         <button
           onClick={handleToggle}
@@ -82,14 +86,66 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </div>
         </button>
 
-        {/* Live Monitoring Badge */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] rounded-full font-label-md text-[11px] font-bold tracking-wider">
-          <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
-          <span>{t('topbar.live_monitoring')}</span>
-        </div>
+        {/* Live Monitoring / Prototype Feed Badge OR Demo Mode Badge */}
+        {isDemoActive ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/15 text-secondary border border-secondary/40 rounded-full font-label-md text-[11px] font-bold tracking-wider animate-pulse">
+            <span className="w-2 h-2 rounded-full bg-secondary"></span>
+            <span>DEMO: {currentStepDef.shortName}</span>
+          </div>
+        ) : (
+          <div
+            className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-surface-container-low text-on-surface-variant border border-outline-variant/30 rounded-full font-label-md text-[11px] font-semibold"
+            title="Prototype Data Feed conforming to CRIS / RTIS operational schemas. Ready for Spring Boot REST API."
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400">
+              {connectionStatus.badgeText}
+            </span>
+            <span className="text-outline-variant/50 text-[10px]">|</span>
+            <span className="text-[11px] text-on-surface-variant hidden lg:inline font-sans">
+              NCR Fleet
+            </span>
+          </div>
+        )}
+
+        {/* SIH Demo Mode Launcher or Exit Controls */}
+        {isDemoActive ? (
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={resetDemo}
+              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant hover:text-primary bg-surface-container-low hover:bg-surface-container border border-outline-variant/40 rounded-full transition-all active:scale-95 cursor-pointer shadow-2xs"
+              title="Reset application to State 1 baseline schedule"
+            >
+              <span className="material-symbols-outlined text-[14px] text-secondary">restart_alt</span>
+              <span className="hidden sm:inline">Reset</span>
+            </button>
+            <button
+              onClick={closeDemo}
+              className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-rose-600 hover:text-white bg-rose-500/10 hover:bg-rose-600 border border-rose-500/30 rounded-full transition-all active:scale-95 cursor-pointer shadow-2xs"
+              title="Exit Demo Mode & Return to Live Operations Dashboard"
+            >
+              <span className="material-symbols-outlined text-[14px]">close</span>
+              <span className="hidden sm:inline">Exit Demo</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => activateDemo('normal')}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-secondary bg-secondary/10 hover:bg-secondary hover:text-white border border-secondary/30 hover:border-secondary rounded-full transition-all duration-200 cursor-pointer shadow-xs active:scale-95 group"
+            title="Launch SIH Round 2 Deterministic Presentation Demo (Train #12309 Rajdhani)"
+          >
+            <span className="material-symbols-outlined text-[16px] text-secondary group-hover:text-white transition-colors">
+              smart_toy
+            </span>
+            <span>SIH Demo Mode</span>
+            <span className="hidden md:inline text-[9px] uppercase font-mono px-1 py-0.2 bg-secondary/15 group-hover:bg-white/20 rounded">
+              4-Step
+            </span>
+          </button>
+        )}
 
         {/* Time Status */}
-        <span className="text-on-surface-variant font-label-md text-[11px] hidden lg:block">
+        <span className="text-on-surface-variant font-label-md text-[11px] hidden xl:block">
           {t('topbar.last_updated')}
         </span>
       </div>
